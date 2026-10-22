@@ -1,19 +1,20 @@
-import { SITE_DATA, type BlogPost } from '../data/siteData';
+import type { BlogPost } from '../data/siteData';
+import { CTF } from '../data/constants';
+import site from '../../content/site.json';
 
 /**
  * live time in adama + today's date in the ethiopian calendar,
  * e.g. { time: '7:55 pm', ethDate: 'tekemt 12, 2019' }
  */
 export function adamaClock(now: Date = new Date()): { time: string; ethDate: string } {
-  const tz = SITE_DATA.identity.timeZone;
+  const tz = site.identity.timeZone;
   const time = new Intl.DateTimeFormat('en-US', {
     timeZone: tz,
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
   })
-    .format(now)
-    .toLowerCase();
+    .format(now);
 
   let ethDate = '';
   try {
@@ -27,7 +28,7 @@ export function adamaClock(now: Date = new Date()): { time: string; ethDate: str
     const month = get('month');
     const day = get('day');
     const year = get('year');
-    if (month && day && year) ethDate = `${month} ${day}, ${year}`.toLowerCase();
+    if (month && day && year) ethDate = `${month} ${day}, ${year}`;
   } catch {
     ethDate = '';
   }
@@ -36,7 +37,7 @@ export function adamaClock(now: Date = new Date()): { time: string; ethDate: str
 
 /** true when the text is the full 3-piece ctf flag */
 export function verifyCtfFlag(input: string): boolean {
-  return input.trim() === SITE_DATA.ctf.fullFlag;
+  return input.trim() === CTF.fullFlag;
 }
 
 /**
@@ -85,7 +86,7 @@ export function updateKeystrokeBuffer(
 ): { nextBuffer: string; triggered: KeystrokeTrigger } {
   if (key.length !== 1) return { nextBuffer: currentBuffer, triggered: null };
   const nextBuffer = (currentBuffer + key.toLowerCase()).slice(-64);
-  if (nextBuffer.endsWith(SITE_DATA.ctf.fullFlag)) return { nextBuffer: '', triggered: 'flag' };
+  if (nextBuffer.endsWith(CTF.fullFlag)) return { nextBuffer: '', triggered: 'flag' };
   if (nextBuffer.endsWith('siuuu')) return { nextBuffer: '', triggered: 'siuuu' };
   return { nextBuffer, triggered: null };
 }

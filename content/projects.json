@@ -1,0 +1,83 @@
+[
+  {
+    "id": "01",
+    "slug": "logbook",
+    "title": "Logbook",
+    "year": "2026",
+    "status": "In use, still building",
+    "kind": "Personal OS",
+    "summary": "A private, offline-first journal with an AI companion that asks a daily question and remembers past entries and photos.",
+    "whatItIs": "A private, offline-first journaling platform that links daily entries, moods, habits and an AI companion. I’m using it to explore how software can support autobiographical memory and self-reflection.",
+    "built": [
+      "Daily entries, mood tracking and habits, all linked together.",
+      "An AI companion that asks a question each day and recalls past entries and photos.",
+      "Logging from Telegram, and Spotify listening history pulled into each day.",
+      "Offline sync, so it works without a connection.",
+      "Goals, a pomodoro focus space, and a “density map” of how my time splits across coding, fitness, faith, work and rest.",
+      "A Python FastAPI backend serving a modular vanilla JS frontend, with a CRT look and two Mt. Fuji themes."
+    ],
+    "next": [
+      "A hosted database",
+      "Invite-only accounts for a few friends, each with a private Logbook",
+      "An Android app"
+    ],
+    "stack": [
+      "JavaScript",
+      "Python",
+      "FastAPI",
+      "SQL"
+    ],
+    "role": "Founder and developer, three months of work so far",
+    "links": [
+      {
+        "label": "Source on GitHub",
+        "href": "https://github.com/kalebdida/logbook"
+      }
+    ]
+  },
+  {
+    "id": "02",
+    "slug": "thinkneuro",
+    "title": "ThinkNeuro research",
+    "year": "Grade 11",
+    "status": "Presented",
+    "kind": "Neuroscience research",
+    "summary": "A bibliometric review of the 100 most-cited papers on detecting adolescent depression and anxiety with wearable nanotechnology and biofeedback.",
+    "whatItIs": "My summer research internship at ThinkNeuro. Our team reviewed the 100 most-cited papers on using wearable nanotechnology and biofeedback to detect depression and anxiety in adolescents.",
+    "built": [
+      "Co-authored the bibliometric review.",
+      "Ran a keyword-trend analysis on research from the 1980s to 2022 to map how neuroscience and psychiatry themes shifted.",
+      "Helped build the data visualizations for the team poster.",
+      "Presented at the ThinkNeuro research symposium."
+    ],
+    "role": "Summer research intern, co-author"
+  },
+  {
+    "id": "03",
+    "slug": "obstacle-robot",
+    "title": "Obstacle-avoidance robot",
+    "year": "2023",
+    "status": "Done",
+    "kind": "Robotics",
+    "summary": "A sensor-based robot that detects and steers around obstacles, built by a team of four that I led.",
+    "whatItIs": "A sensor-based robot that detects obstacles and steers around them. We built it to put our classroom robotics into practice.",
+    "built": [
+      "Wired the sensors to the motor control.",
+      "Debugged both the hardware and the code.",
+      "Tested a working prototype."
+    ],
+    "role": "Project lead, team of four"
+  },
+  {
+    "id": "04",
+    "slug": "church-finder",
+    "title": "Church Finder",
+    "status": "Building",
+    "kind": "Maps app",
+    "summary": "Find the churches near you, starting with every church in Addis Ababa.",
+    "whatItIs": "An app that shows nearby churches and every church in Addis Ababa. Addis first, then other cities.",
+    "built": [
+      "Early build in progress, made with AI coding agents (Claude and Codex) working on the same repo."
+    ]
+  }
+]

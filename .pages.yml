@@ -1,0 +1,373 @@
+# Open this configuration on the source branch in Pages CMS.
+# Branch selection belongs to Pages CMS, not to a YAML branch setting.
+media:
+  input: public/uploads
+  output: /uploads
+content:
+  - name: posts
+    label: Field notes
+    type: collection
+    path: content/posts
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    subfolders: false
+    view:
+      fields:
+        - title
+        - date
+        - status
+        - draft
+      primary: title
+      sort:
+        - date
+        - title
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: date
+        label: Date
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: summary
+        label: Summary
+        type: text
+        required: true
+      - name: tags
+        label: Tags
+        type: string
+        list: true
+        required: true
+      - name: draft
+        label: Draft (hidden from the site and feeds)
+        type: boolean
+        default: true
+        required: true
+      - name: status
+        label: Status
+        type: select
+        required: true
+        default: outline
+        options:
+          values:
+            - outline
+            - published
+      - name: thumbnail
+        label: Thumbnail
+        type: image
+      - name: external_url
+        label: External URL (leave blank for a local post)
+        type: string
+        pattern:
+          regex: ^$|^https://
+          message: Use a full HTTPS URL.
+      - name: external_platform
+        label: External platform
+        type: select
+        options:
+          values:
+            - medium
+            - substack
+      - name: body
+        label: Post body
+        type: rich-text
+  - name: site
+    label: Site
+    type: file
+    path: content/site.json
+    format: json
+    fields:
+      - name: identity
+        label: Identity
+        type: object
+        fields:
+          - name: name
+            label: Name
+            type: string
+          - name: shortName
+            label: Short Name
+            type: string
+          - name: handle
+            label: Handle
+            type: string
+          - name: geezName
+            label: Geez Name
+            type: string
+          - name: url
+            label: Url
+            type: string
+          - name: email
+            label: Email
+            type: string
+          - name: city
+            label: City
+            type: string
+          - name: timeZone
+            label: Time Zone
+            type: string
+          - name: title
+            label: Title
+            type: string
+          - name: tagline
+            label: Tagline
+            type: text
+          - name: intro
+            label: Intro
+            type: text
+      - name: about
+        label: About
+        type: object
+        fields:
+          - name: lead
+            label: Lead
+            type: text
+          - name: paragraphs
+            label: Paragraphs
+            type: text
+            list: true
+          - name: facts
+            label: Facts
+            type: object
+            fields:
+              - name: key
+                label: Key
+                type: string
+              - name: value
+                label: Value
+                type: string
+            list: true
+      - name: disciplines
+        label: Disciplines
+        type: object
+        fields:
+          - name: id
+            label: Id
+            type: string
+            required: true
+            description: Stable identifier. Keep existing IDs unchanged.
+          - name: title
+            label: Title
+            type: string
+          - name: text
+            label: Text
+            type: text
+        list: true
+      - name: offScreen
+        label: Off Screen
+        type: object
+        fields:
+          - name: id
+            label: Id
+            type: string
+            required: true
+            description: Stable identifier. Keep existing IDs unchanged.
+          - name: label
+            label: Label
+            type: string
+          - name: text
+            label: Text
+            type: text
+        list: true
+      - name: now
+        label: Now
+        type: object
+        fields:
+          - name: updated
+            label: Updated
+            type: string
+          - name: season
+            label: Season
+            type: string
+          - name: items
+            label: Items
+            type: object
+            fields:
+              - name: category
+                label: Category
+                type: string
+              - name: detail
+                label: Detail
+                type: text
+            list: true
+      - name: socials
+        label: Socials
+        type: object
+        fields:
+          - name: label
+            label: Label
+            type: string
+          - name: handle
+            label: Handle
+            type: string
+          - name: href
+            label: Href
+            type: string
+        list: true
+  - name: projects
+    label: Projects
+    type: file
+    path: content/projects.json
+    format: json
+    list: true
+    fields:
+      - name: id
+        label: Id
+        type: string
+        required: true
+        description: Stable identifier. Keep existing IDs unchanged.
+      - name: slug
+        label: Slug
+        type: string
+        required: true
+        description: Stable identifier. Keep existing IDs unchanged.
+      - name: title
+        label: Title
+        type: string
+      - name: year
+        label: Year
+        type: string
+      - name: status
+        label: Status
+        type: select
+        options:
+          values:
+            - In use, still building
+            - Building
+            - Done
+            - Presented
+      - name: kind
+        label: Kind
+        type: string
+      - name: summary
+        label: Summary
+        type: text
+      - name: whatItIs
+        label: What It Is
+        type: text
+      - name: built
+        label: Built
+        type: string
+        list: true
+      - name: next
+        label: Next
+        type: string
+        list: true
+      - name: stack
+        label: Stack
+        type: string
+        list: true
+      - name: role
+        label: Role
+        type: string
+      - name: links
+        label: Links
+        type: object
+        fields:
+          - name: label
+            label: Label
+            type: string
+          - name: href
+            label: Href
+            type: string
+        list: true
+  - name: journey
+    label: Journey
+    type: file
+    path: content/journey.json
+    format: json
+    list: true
+    fields:
+      - name: id
+        label: Id
+        type: string
+        required: true
+        description: Stable identifier. Keep existing IDs unchanged.
+      - name: when
+        label: When
+        type: string
+      - name: title
+        label: Title
+        type: string
+      - name: place
+        label: Place
+        type: string
+      - name: note
+        label: Note
+        type: text
+  - name: recognition
+    label: Recognition
+    type: file
+    path: content/recognition.json
+    format: json
+    list: true
+    fields:
+      - name: title
+        label: Title
+        type: string
+      - name: detail
+        label: Detail
+        type: text
+      - name: scope
+        label: Scope
+        type: string
+  - name: resume
+    label: Resume
+    type: file
+    path: content/resume.json
+    format: json
+    fields:
+      - name: title
+        label: Title
+        type: string
+      - name: education
+        label: Education
+        type: object
+        fields:
+          - name: school
+            label: School
+            type: string
+          - name: place
+            label: Place
+            type: string
+          - name: period
+            label: Period
+            type: string
+          - name: notes
+            label: Notes
+            type: text
+        list: true
+      - name: experience
+        label: Experience
+        type: object
+        fields:
+          - name: role
+            label: Role
+            type: string
+          - name: org
+            label: Org
+            type: string
+          - name: when
+            label: When
+            type: string
+          - name: notes
+            label: Notes
+            type: text
+        list: true
+      - name: skills
+        label: Skills
+        type: object
+        fields:
+          - name: group
+            label: Group
+            type: string
+          - name: items
+            label: Items
+            type: string
+            list: true
+        list: true

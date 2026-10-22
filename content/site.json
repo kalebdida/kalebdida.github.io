@@ -1,0 +1,124 @@
+{
+  "identity": {
+    "name": "Kaleb Dida Abera",
+    "shortName": "Kaleb Dida",
+    "handle": "Kal",
+    "geezName": "ካሌብ ዲዳ",
+    "url": "https://kalebdida.github.io",
+    "email": "kalebdida@gmail.com",
+    "city": "Adama, Ethiopia",
+    "timeZone": "Africa/Addis_Ababa",
+    "title": "Aspiring cognitive scientist. Human-centered AI and software.",
+    "tagline": "Minds, machines, and the locks between them.",
+    "intro": "I'm Kal, an aspiring cognitive scientist from Adama. I build human-centered software, play CTFs, and want to become an AI engineer."
+  },
+  "about": {
+    "lead": "I care about three things that turn out to be one thing: how minds work, how to build machines that think, and how to keep those machines safe.",
+    "paragraphs": [
+      "I graduated from Adama Science and Technology University Special School (ASTU SPS) in July 2026, first in my section every year. This is my gap year before studying cognitive science: I’m building Logbook, competing in CTFs, and teaching weekly Bible lessons to kids in my neighborhood.",
+      "Logbook is what I’m building right now. It’s a private, offline-first journal with an AI companion that asks me a question every day and remembers past entries and photos. It’s how I’ve been exploring whether software can support memory and self-reflection.",
+      "Before that came a summer of neuroscience research with ThinkNeuro, the INSA cyber talent program, a four-person robotics team I led, and a Peace Club I founded that grew to 63 members."
+    ],
+    "facts": [
+      {
+        "key": "Based in",
+        "value": "Adama, Ethiopia"
+      },
+      {
+        "key": "Studying next",
+        "value": "Cognitive science"
+      },
+      {
+        "key": "Into",
+        "value": "Human-centered AI, cybersecurity, robotics"
+      },
+      {
+        "key": "Speaks",
+        "value": "Amharic, English, Afaan Oromoo"
+      }
+    ]
+  },
+  "disciplines": [
+    {
+      "id": "mind",
+      "title": "AI and cognitive science",
+      "text": "How minds remember, and how software can help. Logbook’s companion is my experiment in autobiographical memory. ThinkNeuro was my first research."
+    },
+    {
+      "id": "security",
+      "title": "Cybersecurity",
+      "text": "Selected for the INSA cyber talent program in grade 10. Three CTF contests so far, best finish 9th of 53 teams."
+    },
+    {
+      "id": "embedded",
+      "title": "Robotics",
+      "text": "In 2023 I led a team of four building a robot that senses and steers around obstacles. My first look at the perception-action loop."
+    }
+  ],
+  "offScreen": [
+    {
+      "id": "music",
+      "label": "Keyboard and guitar",
+      "text": "I play both. Turn the sound on and the keys a to k on your keyboard play soft notes."
+    },
+    {
+      "id": "football",
+      "label": "Football",
+      "text": "Cristiano Ronaldo and Portugal. Always."
+    },
+    {
+      "id": "writing",
+      "label": "Writing",
+      "text": "Lowercase journals on my Telegram channel. A piece on discipline in the digital age won an international prize."
+    },
+    {
+      "id": "teaching",
+      "label": "Teaching",
+      "text": "Sunday lessons for 12 kids in my neighborhood, and a summer school for 36 students."
+    }
+  ],
+  "now": {
+    "updated": "October 2026",
+    "season": "Gap year",
+    "items": [
+      {
+        "category": "Building",
+        "detail": "Logbook, and Church Finder for Addis Ababa."
+      },
+      {
+        "category": "Competing",
+        "detail": "Capture the flag contests."
+      },
+      {
+        "category": "Teaching",
+        "detail": "Weekly Sunday lessons for 12 neighborhood kids."
+      },
+      {
+        "category": "Applying",
+        "detail": "University applications, to study cognitive science."
+      }
+    ]
+  },
+  "socials": [
+    {
+      "label": "Email",
+      "handle": "kalebdida@gmail.com",
+      "href": "mailto:kalebdida@gmail.com"
+    },
+    {
+      "label": "GitHub",
+      "handle": "kalebdida",
+      "href": "https://github.com/kalebdida"
+    },
+    {
+      "label": "Telegram",
+      "handle": "@kalebdida",
+      "href": "https://t.me/kalebdida"
+    },
+    {
+      "label": "RSS",
+      "handle": "Field notes feed",
+      "href": "/rss.xml"
+    }
+  ]
+}

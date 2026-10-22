@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useDialog } from '../utils/useDialog';
 import { type ProjectCaseFile } from '../data/siteData';
 
 interface ProjectDrawerProps {
@@ -7,19 +7,7 @@ interface ProjectDrawerProps {
 }
 
 export function ProjectDrawer({ project, onClose }: ProjectDrawerProps) {
-  const closeRef = useRef<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    if (project) {
-      const t = window.setTimeout(() => closeRef.current?.focus(), 30);
-      document.body.style.overflow = 'hidden';
-      return () => {
-        window.clearTimeout(t);
-        document.body.style.overflow = '';
-      };
-    }
-    return undefined;
-  }, [project]);
+  const dialogRef = useDialog(!!project, onClose);
 
   if (!project) return null;
 
@@ -31,25 +19,25 @@ export function ProjectDrawer({ project, onClose }: ProjectDrawerProps) {
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label={`case file: ${project.title}`}
-        className="term-in w-full max-w-[600px] h-full bg-night border-l border-hair overflow-y-auto"
+        aria-label={`Case file: ${project.title}`}
+        className="drawer-panel w-full max-w-[680px] h-full bg-night border-l border-hair overflow-y-auto"
         data-lenis-prevent
       >
-        <div className="px-6 sm:px-12 pt-6 pb-16">
-          <div className="flex items-center justify-between h-10">
-            <span className="font-mono text-[12px] text-ash">
-              case file {project.id.padStart(3, '0')} // {project.slug}
+        <div className="drawer-content px-6 sm:px-12 pt-6 pb-16">
+          <div className="flex flex-wrap items-center justify-between gap-3 min-h-10">
+            <span className="font-mono text-[14px] text-ash">
+              Case file {project.id.padStart(3, '0')} // {project.slug}
             </span>
             <button
-              ref={closeRef}
               type="button"
               onClick={onClose}
-              aria-label="close case file"
+              aria-label="Close case file"
               className="t-meta text-ash hover:text-bone transition-colors flex items-center gap-2"
             >
-              close
+              Close
               <kbd className="font-mono text-[11px] px-1.5 py-px rounded border border-hair">esc</kbd>
             </button>
           </div>
@@ -64,7 +52,7 @@ export function ProjectDrawer({ project, onClose }: ProjectDrawerProps) {
               <span
                 aria-hidden="true"
                 className={`inline-block w-1.5 h-1.5 rounded-full ${
-                  project.status === 'done' || project.status === 'presented' ? 'bg-ash' : 'bg-signal'
+                  project.status === 'Done' || project.status === 'Presented' ? 'bg-ash' : 'bg-signal'
                 }`}
               />
               {project.status}
@@ -74,7 +62,7 @@ export function ProjectDrawer({ project, onClose }: ProjectDrawerProps) {
           <p className="t-lead text-bone/90 mt-10">{project.whatItIs}</p>
 
           <section className="mt-12">
-            <h3 className="t-meta text-ash">what exists</h3>
+            <h3 className="t-meta text-ash">What exists</h3>
             <ul className="mt-4 space-y-3">
               {project.built.map((point, i) => (
                 <li key={i} className="t-body text-bone/90 pl-5 relative">
@@ -87,7 +75,7 @@ export function ProjectDrawer({ project, onClose }: ProjectDrawerProps) {
 
           {project.next && project.next.length > 0 && (
             <section className="mt-12">
-              <h3 className="t-meta text-ash">what’s next</h3>
+              <h3 className="t-meta text-ash">What’s next</h3>
               <ul className="mt-4 space-y-2">
                 {project.next.map((point, i) => (
                   <li key={i} className="t-body text-ash pl-5 relative">
@@ -103,13 +91,13 @@ export function ProjectDrawer({ project, onClose }: ProjectDrawerProps) {
             <dl className="mt-12 pt-6 border-t border-hair grid grid-cols-[7rem_1fr] gap-y-3 gap-x-6">
               {project.role && (
                 <>
-                  <dt className="t-meta text-ash">role</dt>
+                  <dt className="t-meta text-ash">Role</dt>
                   <dd className="t-ui text-bone">{project.role}</dd>
                 </>
               )}
               {project.stack && project.stack.length > 0 && (
                 <>
-                  <dt className="t-meta text-ash">built with</dt>
+                  <dt className="t-meta text-ash">Built with</dt>
                   <dd className="t-ui text-bone">{project.stack.join(', ')}</dd>
                 </>
               )}

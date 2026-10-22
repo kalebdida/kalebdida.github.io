@@ -1,0 +1,139 @@
+{
+  "title": "Aspiring cognitive scientist. Human-centered AI and software development.",
+  "education": [
+    {
+      "school": "Adama Science and Technology University Special School",
+      "place": "Adama, Ethiopia",
+      "period": "Graduated July 2026",
+      "notes": "High school diploma. Ranked first in my section every year. Intended field: cognitive science."
+    },
+    {
+      "school": "Gap year",
+      "place": "2026 to 2027",
+      "period": "Now",
+      "notes": "Developing Logbook, competing in CTFs, teaching weekly Bible lessons."
+    }
+  ],
+  "experience": [
+    {
+      "role": "Founder and developer",
+      "org": "Logbook",
+      "when": "2026",
+      "notes": "A private, offline-first journaling platform with an AI companion that asks a daily question and recalls past entries and photos. Telegram logging, Spotify history and offline sync, over three months of development."
+    },
+    {
+      "role": "Summer research intern",
+      "org": "ThinkNeuro",
+      "when": "Grade 11",
+      "notes": "Co-authored a bibliometric review of the 100 most-cited papers on wearable nanotechnology and biofeedback for detecting adolescent depression and anxiety. Ran keyword-trend analysis (1980s to 2022), helped build the poster’s data visualizations, presented at the research symposium."
+    },
+    {
+      "role": "Founder and president",
+      "org": "Peace Club, YMCA-affiliated",
+      "when": "Grade 12",
+      "notes": "Grew it to 63 registered members. Led two sessions a week on gender-based violence and peacekeeping."
+    },
+    {
+      "role": "Summer tutor and program organizer",
+      "org": "Community education initiative",
+      "when": "Grade 12",
+      "notes": "Organized and taught a two-month program for 36 students, over 90% girls. Three classes a week, national exam prep for grades 6 and 8."
+    },
+    {
+      "role": "Selected trainee",
+      "org": "INSA cyber talent program",
+      "when": "Grade 10",
+      "notes": "National cybersecurity program for young technical talent."
+    },
+    {
+      "role": "Project lead",
+      "org": "Obstacle-avoidance robot",
+      "when": "2023",
+      "notes": "Led a team of four. Wired sensors to motor control, debugged hardware and code, tested a working prototype."
+    },
+    {
+      "role": "CTF competitor",
+      "org": "Independent and team competitions",
+      "when": "Grade 10 to now",
+      "notes": "Three contests, best finish 9th of 53 teams."
+    },
+    {
+      "role": "Debater",
+      "org": "Debate club",
+      "when": "Grades 9 to 12",
+      "notes": "Argued three team rounds on school systems; won with my team."
+    },
+    {
+      "role": "Volunteer Bible teacher",
+      "org": "Local community",
+      "when": "Grade 10 to now",
+      "notes": "Weekly Sunday lessons for 12 neighborhood children."
+    },
+    {
+      "role": "Part-time employee",
+      "org": "PJ Masks Playground Adama",
+      "when": "Grades 7 to 10",
+      "notes": "Waiter, cashier and children’s play attendant on weekends for four years."
+    }
+  ],
+  "skills": [
+    {
+      "group": "Programming",
+      "items": [
+        "Python",
+        "JavaScript",
+        "HTML",
+        "CSS",
+        "SQL"
+      ]
+    },
+    {
+      "group": "Software",
+      "items": [
+        "Web apps",
+        "Offline-first design",
+        "Debugging",
+        "Prototyping"
+      ]
+    },
+    {
+      "group": "AI",
+      "items": [
+        "LLM integration",
+        "Human-centered interface design"
+      ]
+    },
+    {
+      "group": "Research",
+      "items": [
+        "Literature review",
+        "Bibliometrics",
+        "Data visualization"
+      ]
+    },
+    {
+      "group": "Engineering",
+      "items": [
+        "CTF problem-solving",
+        "Robotics",
+        "Sensors"
+      ]
+    },
+    {
+      "group": "Creative",
+      "items": [
+        "Writing",
+        "Keyboard",
+        "Guitar"
+      ]
+    },
+    {
+      "group": "Languages",
+      "items": [
+        "Amharic (native)",
+        "English (fluent)",
+        "Afaan Oromoo (fluent)"
+      ]
+    }
+  ]
+}
