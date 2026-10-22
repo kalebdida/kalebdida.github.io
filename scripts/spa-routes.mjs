@@ -11,7 +11,11 @@ if (!existsSync(index)) throw new Error('run vite build first');
 
 const data = readFileSync(join(root, 'src/data/siteData.ts'), 'utf8');
 const postsBlock = data.slice(data.indexOf('posts: ['), data.indexOf('] as BlogPost[]'));
-const slugs = [...postsBlock.matchAll(/slug: '([^']+)'/g)].map((m) => m[1]);
+// only posts that live on this site get a page (medium / substack links open elsewhere)
+const slugs = postsBlock
+  .split(/\n    \{\n/)
+  .filter((b) => !b.includes('external:'))
+  .flatMap((b) => [...b.matchAll(/slug: '([^']+)'/g)].map((m) => m[1]));
 
 const routes = ['blog', 'now', 'resume', ...slugs.map((s) => `blog/${s}`)];
 for (const r of routes) {

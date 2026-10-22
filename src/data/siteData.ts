@@ -63,6 +63,10 @@ export interface BlogPost {
   status: 'outline' | 'published';
   readingTimeMin?: number;
   sections: BlogPostSection[];
+  /** optional preview image, e.g. '/notes/my-post.jpg' (put the file in public/notes/) or a full https url */
+  thumbnail?: string;
+  /** set this for posts that live on medium / substack: the card opens the original there */
+  external?: { url: string; platform: 'medium' | 'substack' | string };
 }
 
 export const SITE_DATA = {
@@ -271,6 +275,24 @@ export const SITE_DATA = {
     { title: '9th of 53', detail: 'best team finish in a capture the flag contest' },
   ] as RecognitionItem[],
 
+  /*
+   * field notes: your own posts and links to medium / substack live together here.
+   * newest first by date. a link-out post looks like this:
+   *
+   * {
+   *   slug: 'my-medium-piece',
+   *   title: 'the title',
+   *   date: '2026-11-02',
+   *   year: '2026',
+   *   summary: 'one or two lines about it.',
+   *   tags: ['writing'],
+   *   draft: false,
+   *   status: 'published',
+   *   sections: [],
+   *   thumbnail: '/notes/my-medium-piece.jpg',
+   *   external: { url: 'https://medium.com/@kalebdida/...', platform: 'medium' },
+   * },
+   */
   posts: [
     {
       slug: 'building-logbook',

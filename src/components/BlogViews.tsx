@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { SITE_DATA, type BlogPost } from '../data/siteData';
 import { filterAndGroupPosts } from '../utils/logic';
+import { NoteCard } from './NoteCard';
 
 interface BlogIndexProps {
   onSelectPost: (slug: string) => void;
@@ -38,7 +39,7 @@ export function BlogIndexView({ onSelectPost, onNavigateHome }: BlogIndexProps) 
       </button>
       <h1 className="t-title text-bone mt-4">field notes</h1>
       <p className="t-lead text-ash mt-5 max-w-[40ch]">
-        writing on building things, minds, and what i learn along the way.
+        writing on building things, minds, and what i learn along the way. some live here, some on medium and substack.
       </p>
 
       <div className="mt-14 flex flex-col sm:flex-row sm:items-center justify-between gap-5 pb-6 border-b border-hair">
@@ -91,11 +92,7 @@ export function BlogIndexView({ onSelectPost, onNavigateHome }: BlogIndexProps) 
               <ul className="mt-2">
                 {group.posts.map((post) => (
                   <li key={post.slug} className="border-t border-hair first:border-t-0">
-                    <button type="button" onClick={() => onSelectPost(post.slug)} className="group w-full text-left py-7">
-                      <span className="t-h3 text-bone group-hover:text-signal transition-colors">{post.title}</span>
-                      <span className="block t-body text-ash mt-2">{post.summary}</span>
-                      <span className="block t-meta text-ash/80 mt-3">{postMeta(post)}</span>
-                    </button>
+                    <NoteCard post={post} onOpen={onSelectPost} />
                   </li>
                 ))}
               </ul>

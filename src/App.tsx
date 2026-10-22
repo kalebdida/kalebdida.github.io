@@ -10,6 +10,7 @@ import { adamaClock, updateKeystrokeBuffer } from './utils/logic';
 import { soundEngine, PIANO_KEY_MAP } from './utils/soundEngine';
 import { ParticleField, type SceneState } from './components/ParticleField';
 import { ProjectDrawer } from './components/ProjectDrawer';
+import { NoteCard } from './components/NoteCard';
 import { BlogIndexView, BlogPostView } from './components/BlogViews';
 import { NowView, ResumeView } from './components/ExtraPages';
 import { FORMATION } from './three/formations';
@@ -626,16 +627,10 @@ export default function App() {
               }
             >
               <ul>
-                {SITE_DATA.posts.slice(0, 3).map((post, i) => (
+                {[...SITE_DATA.posts].filter((p) => !p.draft).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3).map((post, i) => (
                   <li key={post.slug} data-reveal="up" style={delay(i * 80)} className="relative">
                     <div data-reveal="line" className="absolute top-0 left-0 right-0 h-px bg-hair origin-left" />
-                    <button type="button" onClick={() => navigateTo(`/blog/${post.slug}`)} className="group w-full text-left py-7">
-                      <span className="t-h3 text-bone group-hover:text-signal transition-colors">{post.title}</span>
-                      <span className="block t-body text-ash mt-2 max-w-[56ch]">{post.summary}</span>
-                      <span className="block t-meta text-ash/80 mt-3">
-                        {post.status === 'outline' ? 'outline, not written yet' : `${post.readingTimeMin} min read`}
-                      </span>
-                    </button>
+                    <NoteCard post={post} onOpen={(slug) => navigateTo(`/blog/${slug}`)} />
                   </li>
                 ))}
                 <li aria-hidden="true" className="h-px bg-hair" />
