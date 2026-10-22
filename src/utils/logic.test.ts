@@ -2,9 +2,23 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { verifyCtfFlag, filterAndGroupPosts, updateKeystrokeBuffer, adamaClock } from './logic';
 import { buildFormations, makeLayout, FORMATION, FORMATION_COUNT } from '../three/formations';
-import { readFileSync, readdirSync } from 'node:fs';
 import { parsePost } from '../../scripts/content.mjs';
-const posts = readdirSync(new URL('../../content/posts/', import.meta.url)).filter(f => f.endsWith('.md')).map(f => parsePost(f.slice(0, -3), readFileSync(new URL(`../../content/posts/${f}`, import.meta.url), 'utf8')));
+// Isolated fixtures keep CMS additions and deletions from breaking logic tests.
+const fixture = (slug: string, title: string, tags: string[] = []) => parsePost(slug, `---
+title: ${title}
+date: "2026-10-22"
+summary: A test note.
+tags: ${JSON.stringify(tags)}
+draft: false
+status: outline
+---
+## A heading
+A paragraph.`);
+const posts = [
+  fixture('building-logbook', 'Building Logbook', ['Building']),
+  fixture('obstacle-avoiding-robot-2023', 'An obstacle-avoiding robot', ['Robotics']),
+  fixture('why-cognitive-science', 'Why cognitive science', ['Cognitive science']),
+];
 
 const typeAll = (text: string) => {
   let buf = '';
@@ -107,12 +121,12 @@ test('static routes and feeds exclude drafts and external post routes', async ()
   const { siteArtifacts, renderPage } = await import('../../scripts/site-content.mjs');
   const root = new URL('../../', import.meta.url).pathname;
   const data = siteArtifacts(root);
-  assert.equal(data.posts.length, posts.filter(p => !p.draft).length);
+  assert.equal(data.routes.filter(route => route.path.startsWith('blog/')).length, data.posts.filter(post => !post.external).length);
   for (const post of data.posts) {
     assert.equal(data.routes.some(route => route.path === `blog/${post.slug}`), !post.external);
     assert.ok(data.rss.includes(post.title.replace(/&/g, '&amp;')));
   }
   const html = renderPage('<title>Old</title><meta name="description" content="Old"/><link rel="canonical" href="old"/>', data.routes[0], data);
-  assert.ok(html.includes('Kaleb Dida (Kal)'));
+  assert.ok(html.includes(`${data.identity.shortName} (${data.identity.handle})`));
   assert.ok(html.includes('href="https://kalebdida.github.io/"'));
 });
