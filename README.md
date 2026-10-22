@@ -15,4 +15,6 @@ npm run dev
 
 ## publish
 
-push to `main`. the github action in `.github/workflows/deploy.yml` builds the site and puts it on github pages.
+this `source` branch holds the code. push here and the github action in
+`.github/workflows/deploy.yml` builds the site and publishes it to the `main` branch,
+which github pages serves.
