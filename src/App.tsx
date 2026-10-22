@@ -3,17 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import Lenis from 'lenis';
 import { SITE_DATA, type ProjectCaseFile } from './data/siteData';
 import { adamaClock, updateKeystrokeBuffer } from './utils/logic';
 import { soundEngine, PIANO_KEY_MAP } from './utils/soundEngine';
-import { ParticleField, type SceneState } from './components/ParticleField';
+import type { SceneState } from './components/ParticleField';
 import { ProjectDrawer } from './components/ProjectDrawer';
 import { NoteCard } from './components/NoteCard';
-import { BlogIndexView, BlogPostView } from './components/BlogViews';
 import { NowView, ResumeView } from './components/ExtraPages';
+import { Arrow, Motif, Rank, RevealWords, spotlight } from './components/Details';
+import { useDialog } from './utils/useDialog';
+import { useReveals } from './utils/useReveals';
 import { FORMATION } from './three/formations';
+
+const ParticleField = lazy(() => import('./components/ParticleField').then(m => ({ default: m.ParticleField })));
+const BlogIndexView = lazy(() => import('./components/BlogViews').then(m => ({ default: m.BlogIndexView })));
+const BlogPostView = lazy(() => import('./components/BlogViews').then(m => ({ default: m.BlogPostView })));
 
 type RouteState =
   | { page: 'home' }
@@ -34,15 +40,15 @@ function parseLocationToRoute(pathname: string, hash: string): RouteState {
 
 /** the sections of the home page, in order, and the shape the particles take in each */
 const CHAPTERS: { id: string; label: string; formation: number }[] = [
-  { id: 'hero', label: 'kal', formation: FORMATION.mind },
-  { id: 'about', label: 'about', formation: FORMATION.brain },
-  { id: 'disciplines', label: 'what i do', formation: FORMATION.triad },
-  { id: 'work', label: 'work', formation: FORMATION.constellation },
-  { id: 'journey', label: 'journey', formation: FORMATION.highlands },
-  { id: 'recognition', label: 'recognition', formation: FORMATION.dust },
-  { id: 'field-notes', label: 'field notes', formation: FORMATION.dust },
-  { id: 'off-screen', label: 'off-screen', formation: FORMATION.sound },
-  { id: 'contact', label: 'say hi', formation: FORMATION.light },
+  { id: 'hero', label: 'Kal', formation: FORMATION.mind },
+  { id: 'about', label: 'About', formation: FORMATION.brain },
+  { id: 'disciplines', label: 'What I do', formation: FORMATION.triad },
+  { id: 'work', label: 'Work', formation: FORMATION.constellation },
+  { id: 'journey', label: 'Journey', formation: FORMATION.highlands },
+  { id: 'recognition', label: 'Recognition', formation: FORMATION.dust },
+  { id: 'field-notes', label: 'Field notes', formation: FORMATION.dust },
+  { id: 'off-screen', label: 'Off-screen', formation: FORMATION.sound },
+  { id: 'contact', label: 'Say hi', formation: FORMATION.light },
 ];
 
 /** live "7:55 pm" + ethiopian date, refreshed every 20s */
@@ -58,7 +64,7 @@ function useAdamaClock() {
 /** text that rises letter by letter. `trigger` = play on load, or when revealed by scroll */
 function Letters({ text, trigger, delay = 0 }: { text: string; trigger: 'load' | 'reveal'; delay?: number }) {
   return (
-    <span className={trigger === 'load' ? 'letters-load' : 'letters-reveal'} aria-label={text}>
+    <span className={trigger === 'load' ? 'letters-load' : 'letters-reveal'}><span className="sr-only">{text}</span>
       {Array.from(text).map((ch, i) => (
         <span key={i} className="char-mask" aria-hidden="true">
           <span className="char" style={{ '--i': i, '--d': `${delay}ms` } as CSSProperties}>
@@ -84,13 +90,13 @@ function Section({
 }) {
   const formation = CHAPTERS.find((c) => c.id === id)?.formation ?? FORMATION.dust;
   return (
-    <section id={id} data-formation={formation} className="relative py-24 sm:py-36">
+    <section id={id} data-formation={formation} className="home-section relative py-28 sm:py-40">
       <div data-reveal="line" className="absolute top-0 left-0 right-0 h-px bg-hair origin-left" />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-12 gap-y-10">
         <div className="lg:col-span-4">
           <div className="lg:sticky lg:top-28">
-            <h2 data-reveal="mask" className="t-h2 text-bone">
-              <span className="mask-inner">{title}</span>
+            <h2 data-reveal="words" className="t-h2 text-bone">
+              <RevealWords text={title} />
             </h2>
             {aside && (
               <div data-reveal="up" style={{ '--d': '120ms' } as CSSProperties} className="mt-5">
@@ -108,6 +114,13 @@ function Section({
 const delay = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
 
 export default function App() {
+  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const change = () => setReducedMotion(media.matches);
+    media.addEventListener('change', change);
+    return () => media.removeEventListener('change', change);
+  }, []);
   const [showLoader, setShowLoader] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     const params = new URLSearchParams(window.location.search);
@@ -122,11 +135,23 @@ export default function App() {
 
   const [soundOn, setSoundOn] = useState(false);
   const [activeProject, setActiveProject] = useState<ProjectCaseFile | null>(null);
+  const [copiedEmail, setCopiedEmail] = useState<'Copied' | 'Copy failed' | null>(null);
+  const [mobileNav, setMobileNav] = useState(false);
+  const copyTimer = useRef<number | undefined>(undefined);
   const [siuuuToast, setSiuuuToast] = useState(false);
   const [flagFound, setFlagFound] = useState(false);
   const [lastPianoKey, setLastPianoKey] = useState<string | null>(null);
   const [chapter, setChapter] = useState(0);
   const clock = useAdamaClock();
+  const flagDialogRef = useDialog(flagFound, () => setFlagFound(false));
+  useReveals();
+  useEffect(() => () => clearTimeout(copyTimer.current), []);
+  const copyEmail = async () => {
+    try { await navigator.clipboard.writeText(SITE_DATA.identity.email); setCopiedEmail('Copied'); }
+    catch { setCopiedEmail('Copy failed'); }
+    clearTimeout(copyTimer.current);
+    copyTimer.current = window.setTimeout(() => setCopiedEmail(null), 2000);
+  };
 
   const keystrokeBufRef = useRef('');
   const cursorRef = useRef<HTMLDivElement | null>(null);
@@ -144,15 +169,16 @@ export default function App() {
 
   useEffect(() => {
     if (!showLoader) return;
+    if (reducedMotion) { setShowLoader(false); return; }
     const timer = window.setTimeout(() => setShowLoader(false), 480);
     return () => clearTimeout(timer);
-  }, [showLoader]);
+  }, [showLoader, reducedMotion]);
 
   // console greeting + ctf piece 2 of 3
   useEffect(() => {
     const ascii = [' _         _ ', '| | ____ _| |', '| |/ / _` | |', '|   < (_| | |', '|_|\\_\\__,_|_|'].join('\n');
     console.info(
-      `%c${ascii}\n%chey dev. a flag is hidden on this site in three pieces, and one of them is right here.\nwhen you have all three, just type the whole flag anywhere on the page.\n%cctf_part_2: ${SITE_DATA.ctf.part2Console}`,
+      `%c${ascii}\n%cHey dev. A flag is hidden on this site in three pieces, and one of them is right here.\nWhen you have all three, just type the whole flag anywhere on the page.\n%cctf_part_2: ${SITE_DATA.ctf.part2Console}`,
       'color: #EDEAE3; font-family: monospace;',
       'color: #8A8A93; font-family: monospace;',
       'color: #5AD1FF; font-family: monospace;',
@@ -160,6 +186,7 @@ export default function App() {
   }, []);
 
   const navigateTo = (path: string) => {
+    setMobileNav(false);
     window.history.pushState({}, '', path);
     setRoute(parseLocationToRoute(window.location.pathname, window.location.hash));
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
@@ -172,14 +199,14 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const base = 'kaleb dida';
-    if (route.page === 'home') document.title = `${base} (kal)`;
-    else if (route.page === 'blog') document.title = `field notes, ${base}`;
+    const base = SITE_DATA.identity.shortName;
+    if (route.page === 'home') document.title = `${base} (Kal)`;
+    else if (route.page === 'blog') document.title = `Field notes, ${base}`;
     else if (route.page === 'post') {
-      const found = SITE_DATA.posts.find((p) => p.slug === route.slug);
-      document.title = found ? `${found.title}, ${base}` : `field notes, ${base}`;
-    } else if (route.page === 'now') document.title = `now, ${base}`;
-    else if (route.page === 'resume') document.title = `resume, ${base}`;
+      const found = SITE_DATA.posts.find((p) => p.slug === route.slug && !p.draft && !p.external);
+      document.title = found ? `${found.title}, ${base}` : `Field notes, ${base}`;
+    } else if (route.page === 'now') document.title = `Now, ${base}`;
+    else if (route.page === 'resume') document.title = `Resume, ${base}`;
   }, [route]);
 
   // "come back to the void" while the tab is hidden
@@ -188,7 +215,7 @@ export default function App() {
     const onVis = () => {
       if (document.hidden) {
         saved = document.title;
-        document.title = 'come back to the void';
+        document.title = 'Come back to the void';
       } else {
         document.title = saved;
       }
@@ -197,31 +224,9 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', onVis);
   }, []);
 
-  // scroll reveals: anything with data-reveal fades / rises in once it enters the screen
-  useEffect(() => {
-    const els = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
-    if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      els.forEach((el) => el.classList.add('is-in'));
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-in');
-            io.unobserve(entry.target);
-          }
-        });
-      },
-      { rootMargin: '0px 0px -12% 0px', threshold: 0.12 },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, [route]);
-
   // smooth scroll + everything that follows the scroll position
   useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduced = reducedMotion;
     let lenis: Lenis | null = null;
     let rafId = 0;
     if (!reduced) {
@@ -262,6 +267,10 @@ export default function App() {
         const r = journey.getBoundingClientRect();
         sceneRef.current.journeyDrift = Math.min(1, Math.max(0, (vh * 0.6 - r.top) / Math.max(1, r.height)));
       }
+      const milestones = Array.from(journeyListRef.current?.querySelectorAll('li') ?? []);
+      let nearest = 0, distance = Infinity;
+      milestones.forEach((el, i) => { const r = el.getBoundingClientRect(); const d = Math.abs(r.top + r.height / 2 - vh / 2); if (d < distance) { distance = d; nearest = i; } });
+      milestones.forEach((el, i) => el.classList.toggle('is-current', i === nearest));
       const list = journeyListRef.current;
       if (list) {
         const r = list.getBoundingClientRect();
@@ -278,7 +287,7 @@ export default function App() {
       cancelAnimationFrame(rafId);
       lenis?.destroy();
     };
-  }, [route.page]);
+  }, [route.page, reducedMotion]);
 
   // keyboard: esc closes things, a to k plays piano when sound is on, "siuuu", and the flag
   useEffect(() => {
@@ -291,7 +300,7 @@ export default function App() {
         else if (activeProject) setActiveProject(null);
         return;
       }
-      if (isInput || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (activeProject || flagFound || e.metaKey || e.ctrlKey || e.altKey) return;
 
       const { nextBuffer, triggered } = updateKeystrokeBuffer(keystrokeBufRef.current, e.key);
       keystrokeBufRef.current = nextBuffer;
@@ -302,10 +311,12 @@ export default function App() {
         setFlagFound(true);
       }
 
+      if (isInput) return;
       const k = e.key.toLowerCase();
       if (soundEngine.isEnabled() && PIANO_KEY_MAP[k]) {
         soundEngine.playPianoNote(k);
         setLastPianoKey(k);
+        window.setTimeout(() => setLastPianoKey(current => current === k ? null : current), 240);
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -315,7 +326,7 @@ export default function App() {
   // cursor ring on fine pointers; it opens up over anything clickable
   useEffect(() => {
     const el = cursorRef.current;
-    if (!el || window.matchMedia('(pointer: coarse)').matches) return;
+    if (!el || window.matchMedia('(pointer: coarse), (prefers-reduced-motion: reduce)').matches) return;
     const onMove = (e: MouseEvent) => {
       el.style.opacity = '1';
       el.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
@@ -331,7 +342,7 @@ export default function App() {
       window.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseleave', onLeave);
     };
-  }, []);
+  }, [reducedMotion]);
 
   const handleToggleSound = (forceState?: boolean) => {
     const next = typeof forceState === 'boolean' ? soundEngine.setEnabled(forceState) : soundEngine.toggle();
@@ -339,20 +350,22 @@ export default function App() {
   };
 
   const scrollToSection = (sectionId: string) => {
+    setMobileNav(false);
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth';
     if (route.page !== 'home') {
       navigateTo('/');
-      window.setTimeout(() => document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' }), 80);
+      window.setTimeout(() => document.getElementById(sectionId)?.scrollIntoView({ behavior: behavior as ScrollBehavior }), 80);
     } else {
-      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: behavior as ScrollBehavior });
     }
   };
 
   const navItems = [
-    { label: 'about', onClick: () => scrollToSection('about'), active: false },
-    { label: 'work', onClick: () => scrollToSection('work'), active: false },
-    { label: 'journey', onClick: () => scrollToSection('journey'), active: false },
-    { label: 'field notes', onClick: () => navigateTo('/blog'), active: route.page === 'blog' || route.page === 'post' },
-    { label: 'now', onClick: () => navigateTo('/now'), active: route.page === 'now' },
+    { label: 'About', onClick: () => scrollToSection('about'), active: false },
+    { label: 'Work', onClick: () => scrollToSection('work'), active: false },
+    { label: 'Journey', onClick: () => scrollToSection('journey'), active: false },
+    { label: 'Field notes', onClick: () => navigateTo('/blog'), active: route.page === 'blog' || route.page === 'post' },
+    { label: 'Now', onClick: () => navigateTo('/now'), active: route.page === 'now' },
   ];
 
   return (
@@ -367,7 +380,7 @@ export default function App() {
 
       {showLoader && (
         <div aria-hidden="true" className="fixed inset-0 z-[60] flex items-center justify-center bg-night pointer-events-none">
-          <span className="loader-fade font-serif text-[28px] font-light text-bone">kal</span>
+          <span className="loader-fade font-serif text-[28px] font-light text-bone">Kal</span>
         </div>
       )}
 
@@ -384,11 +397,11 @@ export default function App() {
         <span />
       </div>
 
-      <ParticleField mode={route.page === 'home' ? 'home' : 'calm'} sceneRef={sceneRef} />
+      <Suspense fallback={null}><ParticleField mode={route.page === 'home' ? 'home' : 'calm'} sceneRef={sceneRef} /></Suspense>
 
       {/* nav */}
       <header className="fixed top-0 left-0 right-0 z-30 bg-night/70 backdrop-blur-md border-b border-hair print:hidden">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           <a
             href="/"
             onClick={(e) => {
@@ -397,9 +410,10 @@ export default function App() {
             }}
             className="font-serif text-[22px] tracking-[-0.01em] text-bone hover:text-signal transition-colors"
           >
-            kal
+            Kal
           </a>
-          <nav aria-label="primary" className="hidden md:flex items-center gap-8">
+          <button type="button" className="md:hidden t-meta link-quiet ml-auto" aria-expanded={mobileNav} aria-controls="primary-nav" onClick={() => setMobileNav(!mobileNav)}>{mobileNav ? 'Close menu' : 'Menu'}</button>
+          <nav id="primary-nav" aria-label="Primary" className={`primary-nav ${mobileNav ? 'is-open' : ''} md:flex items-center gap-6`}>
             {navItems.map((item) => (
               <button
                 key={item.label}
@@ -423,20 +437,21 @@ export default function App() {
               <i />
               <i />
             </span>
-            {soundOn ? 'sound on' : 'sound off'}
+            {soundOn ? 'Sound on' : 'Sound off'}
           </button>
         </div>
         {/* thin page progress */}
         <div ref={progressRef} aria-hidden="true" className="page-progress" />
       </header>
 
-      <main className="relative z-10">
+      <main className="relative z-10"><Suspense fallback={<p className="t-ui max-w-3xl mx-auto px-6 pt-36">Loading field notes…</p>}>
         {route.page === 'blog' && (
           <BlogIndexView onSelectPost={(slug) => navigateTo(`/blog/${slug}`)} onNavigateHome={() => navigateTo('/')} />
         )}
         {route.page === 'post' &&
           (() => {
-            const post = SITE_DATA.posts.find((p) => p.slug === route.slug) ?? SITE_DATA.posts[0];
+            const post = SITE_DATA.posts.find((p) => p.slug === route.slug && !p.draft && !p.external);
+            if (!post) return <div className="max-w-3xl mx-auto px-6 pt-36 pb-28"><h1 className="t-title">Note not found</h1><button type="button" className="link t-ui mt-8" onClick={() => navigateTo('/blog')}>All field notes</button></div>;
             return (
               <BlogPostView
                 post={post}
@@ -456,7 +471,7 @@ export default function App() {
                 <span>{SITE_DATA.identity.city}</span>
                 <span className="text-right">
                   {clock.time}
-                  {clock.ethDate && <span className="hidden sm:inline">, {clock.ethDate}</span>}
+                  {clock.ethDate && <span className="block sm:inline"><span className="hidden sm:inline">, </span>{clock.ethDate}</span>}
                 </span>
               </div>
 
@@ -481,13 +496,13 @@ export default function App() {
 
                 <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-3 t-ui intro-fade" style={delay(1400)}>
                   <button type="button" onClick={() => scrollToSection('work')} className="link">
-                    see the work
+                    See the work
                   </button>
                   <button type="button" onClick={() => navigateTo('/blog')} className="link-quiet">
-                    read field notes
+                    Read field notes
                   </button>
                   <button type="button" onClick={() => navigateTo('/resume')} className="link-quiet">
-                    resume
+                    Resume
                   </button>
                 </div>
               </div>
@@ -498,9 +513,9 @@ export default function App() {
             </section>
 
             {/* about */}
-            <Section id="about" title="about">
-              <p data-reveal="up" className="t-lead text-bone max-w-[34ch]">
-                {SITE_DATA.about.lead}
+            <Section id="about" title="About">
+              <p data-reveal="words" className="about-pullquote t-lead text-bone max-w-[34ch]">
+                <RevealWords text={SITE_DATA.about.lead} />
               </p>
               <div className="mt-8 space-y-5 t-body text-ash max-w-[60ch]">
                 {SITE_DATA.about.paragraphs.map((p, idx) => (
@@ -509,10 +524,11 @@ export default function App() {
                   </p>
                 ))}
               </div>
-              <dl className="relative mt-12 pt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
+              <dl onPointerMove={spotlight} className="facts-grid spotlight relative mt-14 grid grid-cols-1 sm:grid-cols-2">
                 <div data-reveal="line" className="absolute top-0 left-0 right-0 h-px bg-hair origin-left" />
                 {SITE_DATA.about.facts.map((fact, i) => (
-                  <div key={fact.key} data-reveal="up" style={delay(i * 70)}>
+                  <div key={fact.key} data-reveal="up" className="fact-card" style={delay(i * 70)}>
+                    <Motif kind={['location', 'study', 'mind', 'language'][i]} />
                     <dt className="t-meta text-ash">{fact.key}</dt>
                     <dd className="t-ui text-bone mt-1">{fact.value}</dd>
                   </div>
@@ -521,18 +537,23 @@ export default function App() {
             </Section>
 
             {/* what i do */}
-            <Section id="disciplines" title="what i do">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-10 md:pb-40">
+            <Section id="disciplines" title="What I do">
+              <div className="discipline-grid grid grid-cols-1 xl:grid-cols-3 gap-4">
                 {SITE_DATA.disciplines.map((d, i) => (
                   <div
                     key={d.id}
                     data-reveal="up"
                     style={delay(i * 110)}
-                    className="discipline"
+                    className="discipline spotlight"
+                    tabIndex={0}
+                    onPointerMove={spotlight}
+                    onFocus={() => (sceneRef.current.hl3 = i)}
+                    onBlur={() => (sceneRef.current.hl3 = -1)}
                     onMouseEnter={() => (sceneRef.current.hl3 = i)}
                     onMouseLeave={() => (sceneRef.current.hl3 = -1)}
                   >
-                    <h3 className="t-h3 text-bone">{d.title}</h3>
+                    <Motif kind={d.id} />
+                    <h3 className="t-h3 text-bone mt-6">{d.title}</h3>
                     <p className="t-ui text-ash mt-3 leading-relaxed">{d.text}</p>
                   </div>
                 ))}
@@ -540,7 +561,7 @@ export default function App() {
             </Section>
 
             {/* work */}
-            <Section id="work" title="work" aside={<p className="t-ui text-ash max-w-[28ch]">open any one to read its case file.</p>}>
+            <Section id="work" title="Work" aside={<p className="t-ui text-ash max-w-[28ch]">Open any one to read its case file.</p>}>
               <ul className="work-list">
                 {SITE_DATA.projects.map((project, i) => (
                   <li key={project.id} data-reveal="up" style={delay(i * 80)} className="relative">
@@ -552,17 +573,18 @@ export default function App() {
                       onMouseLeave={() => (sceneRef.current.hl4 = -1)}
                       onFocus={() => (sceneRef.current.hl4 = i)}
                       onBlur={() => (sceneRef.current.hl4 = -1)}
-                      className="work-row group w-full text-left py-8 grid grid-cols-[2.5rem_1fr] sm:grid-cols-[3rem_1fr_auto] gap-x-4 gap-y-2"
+                      onPointerMove={spotlight}
+                      className="work-row spotlight group w-full text-left py-8 grid grid-cols-[2.5rem_1fr] sm:grid-cols-[2.5rem_1fr] gap-x-4 gap-y-2"
                     >
                       <span className="t-meta text-ash pt-2 group-hover:text-signal transition-colors">{project.id}</span>
                       <span className="work-row-body">
-                        <span className="t-h3 lg:text-[1.75rem] text-bone group-hover:text-signal transition-colors">
+                        <span className="t-h3 text-bone group-hover:text-signal transition-colors">
                           {project.title}
                         </span>
                         <span className="block t-body text-ash mt-2 max-w-[52ch]">{project.summary}</span>
                       </span>
-                      <span className="col-start-2 sm:col-start-3 sm:row-start-1 t-meta text-ash sm:text-right sm:pt-2 whitespace-nowrap">
-                        {project.year ?? project.status}
+                      <span className="work-preview col-start-2 t-meta text-ash flex flex-wrap items-center gap-3 mt-3">
+                        <span className="status-pill">{project.status}</span><span>{project.kind}{project.year ? ` · ${project.year}` : ''}</span><Arrow className="work-arrow ml-auto text-signal" />
                       </span>
                     </button>
                   </li>
@@ -572,7 +594,7 @@ export default function App() {
             </Section>
 
             {/* journey */}
-            <Section id="journey" title="journey">
+            <Section id="journey" title="Journey">
               <ol ref={journeyListRef} className="journey-list relative pl-8">
                 <span aria-hidden="true" className="journey-rail" />
                 {SITE_DATA.journey.map((m, i) => (
@@ -583,9 +605,9 @@ export default function App() {
                     className="relative py-6 grid grid-cols-1 sm:grid-cols-[9.5rem_1fr] gap-x-8 gap-y-1"
                   >
                     <span aria-hidden="true" className="jdot" />
-                    <span className="t-meta text-ash sm:pt-1.5">{m.when}</span>
+                    <span className="t-meta text-ash sm:pt-1.5"><span className="period-chip">{m.when}</span></span>
                     <div>
-                      <h3 className="font-serif text-[1.3125rem] leading-snug text-bone">
+                      <h3 className="t-h3 text-bone">
                         {m.title}
                         {m.place && <span className="text-ash">, {m.place}</span>}
                       </h3>
@@ -597,19 +619,19 @@ export default function App() {
             </Section>
 
             {/* recognition */}
-            <Section id="recognition" title="recognition">
+            <Section id="recognition" title="Recognition">
               <ul>
                 {SITE_DATA.recognition.map((item, i) => (
                   <li
                     key={item.detail}
                     data-reveal="up"
                     style={delay(i * 70)}
-                    className="relative py-6 grid grid-cols-1 sm:grid-cols-[9.5rem_1fr_auto] gap-x-8 gap-y-1 items-baseline"
+                    className="recognition-row relative py-9 grid grid-cols-1 sm:grid-cols-[11rem_1fr] gap-4 items-baseline"
                   >
                     <div data-reveal="line" className="absolute top-0 left-0 right-0 h-px bg-hair origin-left" />
-                    <span className="font-serif text-[1.5rem] leading-none text-bone">{item.title}</span>
+                    <Rank title={item.title} />
                     <span className="t-body text-ash">{item.detail}</span>
-                    {item.scope && <span className="t-meta text-ash sm:text-right">{item.scope}</span>}
+                    {item.scope && <span className="scope-pill t-meta text-ash sm:col-start-2">{item.scope}</span>}
                   </li>
                 ))}
                 <li aria-hidden="true" className="h-px bg-hair" />
@@ -619,10 +641,10 @@ export default function App() {
             {/* field notes */}
             <Section
               id="field-notes"
-              title="field notes"
+              title="Field notes"
               aside={
                 <button type="button" onClick={() => navigateTo('/blog')} className="t-ui link">
-                  all notes
+                  All notes
                 </button>
               }
             >
@@ -638,10 +660,11 @@ export default function App() {
             </Section>
 
             {/* off-screen */}
-            <Section id="off-screen" title="off-screen">
+            <Section id="off-screen" title="Off-screen">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-10">
                 {SITE_DATA.offScreen.map((item, i) => (
-                  <div key={item.id} data-reveal="up" style={delay(i * 80)}>
+                  <div key={item.id} data-reveal="up" className="offscreen-card" tabIndex={0} style={delay(i * 80)}>
+                    <Motif kind={item.id} />
                     <h3 className="t-h3 text-bone">{item.label}</h3>
                     <p className="t-body text-ash mt-2">{item.text}</p>
                   </div>
@@ -650,8 +673,8 @@ export default function App() {
 
               <div data-reveal="up" className="relative mt-14 pt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
                 <div className="absolute top-0 left-0 right-0 h-px bg-hair" />
-                <p className="t-ui text-ash">{soundOn ? 'play with a to k, or click.' : 'click a key to turn the sound on.'}</p>
-                <div className="flex items-stretch" role="group" aria-label="piano">
+                <p className="t-ui text-ash">{soundOn ? 'Play with a to k, or click.' : 'Click a key to turn the sound on.'}</p>
+                <div className="flex items-stretch" role="group" aria-label="Piano">
                   {Object.entries(PIANO_KEY_MAP).map(([k, info]) => (
                     <button
                       key={k}
@@ -660,8 +683,9 @@ export default function App() {
                         if (!soundEngine.isEnabled()) handleToggleSound(true);
                         soundEngine.playPianoNote(k);
                         setLastPianoKey(k);
+        window.setTimeout(() => setLastPianoKey(current => current === k ? null : current), 240);
                       }}
-                      aria-label={`play ${info.label} (key ${k})`}
+                      aria-label={`Play ${info.label} (key ${k})`}
                       className={`piano-key ${lastPianoKey === k && soundOn ? 'is-last' : ''}`}
                     >
                       {k}
@@ -675,27 +699,19 @@ export default function App() {
             <section id="contact" data-formation={FORMATION.light} className="relative min-h-[100svh] pt-32 pb-12 flex flex-col">
               <div data-reveal="line" className="absolute top-0 left-0 right-0 h-px bg-hair origin-left" />
               <div className="my-auto">
-                <h2 data-reveal="chars" className="t-display text-bone">
-                  <Letters text="say hi." trigger="reveal" />
+                <h2 data-reveal="chars" className="contact-title t-display text-bone">
+                  <Letters text="Say hi." trigger="reveal" />
                 </h2>
                 <p data-reveal="up" style={delay(300)} className="t-lead text-ash mt-8 max-w-[36ch]">
-                  happy to talk about cognitive science, security, robotics, or whatever you’re building.
+                  Happy to talk about cognitive science, security, robotics, or whatever you’re building.
                 </p>
-                <dl className="mt-12 grid grid-cols-[6.5rem_1fr] gap-y-3 gap-x-6 max-w-md">
+                <dl className="contact-grid mt-12 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl">
                   {SITE_DATA.socials.map((soc, i) => (
-                    <div key={soc.label} className="contents">
-                      <dt data-reveal="up" style={delay(400 + i * 60)} className="t-meta text-ash pt-px">
-                        {soc.label}
-                      </dt>
-                      <dd data-reveal="up" style={delay(400 + i * 60)}>
-                        <a
-                          href={soc.href}
-                          target={soc.href.startsWith('http') ? '_blank' : undefined}
-                          rel={soc.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                          className="t-ui link"
-                        >
-                          {soc.handle}
-                        </a>
+                    <div key={soc.label} data-reveal="up" style={delay(200 + i * 60)} className="contact-card">
+                      <dt className="t-meta text-ash">{soc.label}</dt>
+                      <dd className="mt-2 flex items-center gap-3">
+                        <a href={soc.href} target={soc.href.startsWith('http') ? '_blank' : undefined} rel={soc.href.startsWith('http') ? 'noopener noreferrer' : undefined} className="t-ui link">{soc.handle}<Arrow className="contact-arrow ml-2 inline-block align-middle" /></a>
+                        {soc.href.startsWith('mailto:') && <button type="button" onClick={copyEmail} className="copy-button t-meta" aria-label="Copy email address">Copy</button>}
                       </dd>
                     </div>
                   ))}
@@ -705,22 +721,22 @@ export default function App() {
               <footer className="relative mt-24 pt-6 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 t-meta text-ash">
                 <div className="absolute top-0 left-0 right-0 h-px bg-hair" />
                 <span>
-                  © {new Date().getFullYear()} {SITE_DATA.identity.name.toLowerCase()}
+                  © {new Date().getFullYear()} {SITE_DATA.identity.name}
                   <span className="t-geez ml-2">{SITE_DATA.identity.geezName}</span>
                 </span>
                 <span className="flex items-center gap-6">
                   <button type="button" onClick={() => navigateTo('/now')} className="link-quiet">
-                    now
+                    Now
                   </button>
                   <button type="button" onClick={() => navigateTo('/resume')} className="link-quiet">
-                    resume
+                    Resume
                   </button>
                 </span>
               </footer>
             </section>
           </div>
         )}
-      </main>
+      </Suspense></main>
 
       {/* which chapter you're in (desktop) */}
       {route.page === 'home' && (
@@ -734,14 +750,16 @@ export default function App() {
         </div>
       )}
 
+      {copiedEmail && <div className="copy-toast t-ui" role="status">{copiedEmail}</div>}
+
       {siuuuToast && (
         <div
           role="status"
           aria-live="polite"
           data-testid="siuuu-toast"
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 rounded-md border border-hair bg-raised font-mono text-[12px] text-bone fade-in"
+          className="fixed bottom-6 left-6 right-6 w-fit mx-auto z-50 px-3 py-1.5 rounded-md border border-hair bg-raised font-mono text-[14px] text-bone fade-in"
         >
-          siuuu.
+          Siuuu.
         </div>
       )}
 
@@ -753,16 +771,18 @@ export default function App() {
           }}
         >
           <div
+            ref={flagDialogRef}
+            data-lenis-prevent
             role="dialog"
             aria-modal="true"
-            aria-label="you found the flag"
+            aria-label="You found the flag"
             data-testid="ctf-thank-you"
-            className="term-in w-full max-w-md bg-raised border border-hair rounded-[10px] p-8"
+            className="flag-dialog term-in w-full max-w-lg bg-raised border border-hair rounded-[10px] p-8"
           >
-            <p className="font-mono text-[12px] text-signal">{SITE_DATA.ctf.fullFlag}</p>
-            <p className="t-h2 text-bone mt-5">thank you for looking closely.</p>
+            <p className="font-mono text-[14px] text-signal break-all">{SITE_DATA.ctf.fullFlag}</p>
+            <p className="t-h2 text-bone mt-5">Thank you for looking closely.</p>
             <p className="t-ui text-ash mt-4 leading-relaxed">
-              most people skim and move on. you read the source, opened the console and checked robots.txt. write to me
+              Most people skim and move on. You read the source, opened the console and checked robots.txt. Write to me
               at{' '}
               <a href={`mailto:${SITE_DATA.identity.email}?subject=found%20the%20flag`} className="link">
                 {SITE_DATA.identity.email}
@@ -770,7 +790,7 @@ export default function App() {
               and tell me you found it.
             </p>
             <button type="button" onClick={() => setFlagFound(false)} className="t-meta link-quiet mt-8">
-              close
+              Close
             </button>
           </div>
         </div>
