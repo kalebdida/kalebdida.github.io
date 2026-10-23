@@ -146,6 +146,7 @@ function rotateX(p: [number, number, number], a: number): [number, number, numbe
 
 export interface Formations {
   list: Float32Array[]; // indexed by FORMATION
+  link: Float32Array; // -1 for star cores, otherwise interpolation along a constellation link
   seed: Float32Array; // 0..1 per particle, used for stagger + twinkle
   group: Float32Array; // 0..1 per particle, picks the cluster in triad / constellation / halo
 }
@@ -155,6 +156,7 @@ export function buildFormations(count: number, layout: Layout): Formations {
   const list = Array.from({ length: FORMATION_COUNT }, () => new Float32Array(count * 3));
   const seed = new Float32Array(count);
   const group = new Float32Array(count);
+  const link = new Float32Array(count).fill(-1);
 
   for (let i = 0; i < count; i++) {
     seed[i] = rand();
@@ -221,7 +223,7 @@ export function buildFormations(count: number, layout: Layout): Formations {
   /* 1 brain: side view. cerebrum with folds, temporal lobe, cerebellum, brainstem */
   {
     const [bx, by, bz] = layout.brainCenter;
-    const s = layout.isMobile ? 0.62 : 0.88;
+    const s = 0.88;
     const onEllipsoid = (rx: number, ry: number, rz: number) => {
       const u = rand();
       const v = rand();
@@ -334,7 +336,7 @@ export function buildFormations(count: number, layout: Layout): Formations {
       const t = rand();
       return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, 0];
     };
-    const scale = layout.isMobile ? 0.42 : 0.72;
+    const scale = 0.72;
 
     for (let i = 0; i < count; i++) {
       const g = Math.min(2, Math.floor(group[i] * 3));
@@ -404,7 +406,7 @@ export function buildFormations(count: number, layout: Layout): Formations {
             p = [(rand() < 0.5 ? -1 : 1) * 0.022, -0.18 - t * 0.17, D + 0.01];
           }
         }
-        p = rotateY([p[0], p[1] + 0.12, p[2]], 0.5);
+        p = [p[0], p[1] + 0.12, p[2]];
       } else {
         const r = seed[i];
         if (r < 0.2) {
@@ -449,6 +451,7 @@ export function buildFormations(count: number, layout: Layout): Formations {
         const from = g === stars.length - 1 ? stars[g - 1] : stars[g];
         const to = g === stars.length - 1 ? stars[g] : next;
         const t = rand();
+        link[i] = t;
         p = [
           from[0] + (to[0] - from[0]) * t + gauss(rand) * 0.012,
           from[1] + (to[1] - from[1]) * t + gauss(rand) * 0.012,
@@ -511,5 +514,5 @@ export function buildFormations(count: number, layout: Layout): Formations {
     }
   }
 
-  return { list, seed, group };
+  return { list, seed, group, link };
 }

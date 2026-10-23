@@ -3,10 +3,12 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { AnchorTracker, screenToWorld, samplePortrait } from '../three/anchors';
 import { buildFormations, makeLayout, FORMATION } from '../three/formations';
 
 /** what the page tells the particle scene, written on scroll / hover, read every frame */
 export interface SceneState {
+  portrait?: string;
   stage: number; // continuous section index, e.g. 2.4 = 40% of the way from section 2 to 3
   formations: number[]; // formation used by each section, in page order
   journeyDrift: number; // 0..1 progress through the journey section
@@ -16,11 +18,14 @@ export interface SceneState {
 
 interface ParticleFieldProps {
   /** 'home' morphs with scroll; 'calm' keeps a distant, still starfield for reading pages */
-  mode: 'home' | 'calm';
+  mode: 'home' | 'calm' | 'lost';
   sceneRef: React.MutableRefObject<SceneState>;
 }
 
 const VERTEX_SHADER = /* glsl */ `
+  attribute vec3 aPortrait;
+  attribute float aPortraitBrightness;
+  attribute float aLink;
   attribute vec3 aBrain;
   attribute vec3 aTriad;
   attribute vec3 aConst;
@@ -31,6 +36,18 @@ const VERTEX_SHADER = /* glsl */ `
   attribute float aSeed;
   attribute float aGroup;
 
+  uniform mat3 uViewBasis;
+  uniform vec3 uBrainTarget;
+  uniform float uBrainScale;
+  uniform vec3 uTriadTarget[3];
+  uniform float uTriadScale[3];
+  uniform vec3 uStarTarget[4];
+  uniform vec3 uStarBase[4];
+  uniform float uStarScale[4];
+  uniform vec3 uLightTarget;
+  uniform float uLightScale;
+  uniform float uPortrait;
+  uniform float uTransition;
   uniform float uTime;
   uniform float uFrom;
   uniform float uTo;
@@ -77,14 +94,27 @@ const VERTEX_SHADER = /* glsl */ `
     vec3 p0 = mix(rotY(o, t * 0.07) * (1.0 + sin(t * 0.8) * 0.012), o, isOrbit) + uOrbCenter;
 
     // 1 brain: a slow sway
-    vec3 p1 = rotY(aBrain - uBrainCenter, sin(t * 0.18) * 0.35) * (1.0 + sin(t * 0.7) * 0.012) + uBrainCenter;
+    vec3 brainLocal = mix(rotY(aBrain - uBrainCenter, sin(t * 0.18) * 0.2), aPortrait, uPortrait);
+    vec3 p1 = uBrainTarget + uViewBasis * brainLocal * uBrainScale;
 
     // 2 triad: each cluster turns on its own axis (the circuit barely moves)
     vec3 tc = uTriadC0 * sel(g3, 0.0) + uTriadC1 * sel(g3, 1.0) + uTriadC2 * sel(g3, 2.0);
-    vec3 p2 = rotY(aTriad - tc, sin(t * (0.25 + g3 * 0.05)) * (0.6 - sel(g3, 2.0) * 0.45)) + tc;
+    int tri = int(g3);
+    vec3 triLocal = aTriad - tc;
+    // The lock always faces the camera. Only a small, upright sway is allowed.
+    float sway = sin(t * 0.32) * 0.035;
+    if (tri == 1) triLocal.xy = mat2(cos(sway), -sin(sway), sin(sway), cos(sway)) * triLocal.xy;
+    else triLocal = rotY(triLocal, sin(t * .25) * .12);
+    vec3 p2 = uTriadTarget[tri] + uViewBasis * triLocal * uTriadScale[tri];
 
     // 3 constellation: a tiny drift
-    vec3 p3 = aConst + vec3(sin(t * 0.3 + aSeed * 20.0), cos(t * 0.25 + aSeed * 17.0), 0.0) * 0.015;
+    int star = int(g4);
+    vec3 p3;
+    if (aLink >= 0.0) {
+      int start = star == 3 ? 2 : star;
+      int end = star == 3 ? 3 : star + 1;
+      p3 = mix(uStarTarget[start], uStarTarget[end], aLink);
+    } else p3 = uStarTarget[star] + uViewBasis * (aConst - uStarBase[star]) * uStarScale[star];
 
     // 4 highlands: still ground, the camera moves instead
     vec3 p4 = aLand;
@@ -99,7 +129,7 @@ const VERTEX_SHADER = /* glsl */ `
     // 7 light: a pulsing core inside a turning halo
     vec3 lp = aLight - uLightCenter;
     lp = mix(lp * (1.0 + sin(t * 1.6 + aSeed * 6.2831) * 0.18), rotY(lp, t * 0.25), isRing);
-    vec3 p7 = lp + uLightCenter;
+    vec3 p7 = uLightTarget + uViewBasis * lp * uLightScale;
 
     vec3 pa = p0 * sel(uFrom, 0.0) + p1 * sel(uFrom, 1.0) + p2 * sel(uFrom, 2.0) + p3 * sel(uFrom, 3.0)
             + p4 * sel(uFrom, 4.0) + p5 * sel(uFrom, 5.0) + p6 * sel(uFrom, 6.0) + p7 * sel(uFrom, 7.0);
@@ -145,6 +175,7 @@ const VERTEX_SHADER = /* glsl */ `
     d.x *= uAspect;
     float dist = length(d);
     float push = (1.0 - smoothstep(0.0, 0.32, dist)) * uMouseStrength * (1.0 - uCalm);
+    push *= 1.0 - .96 * clamp(wBrain + wTriad + wConst + wLight, 0.0, 1.0);
     mv.xy += (d / max(dist, 0.0001)) * push * 0.45 * (-mv.z / 7.0);
     gl_Position = projectionMatrix * mv;
 
@@ -155,13 +186,16 @@ const VERTEX_SHADER = /* glsl */ `
     float base = mix(1.4, 2.6, fract(aSeed * 17.3)) * uSizeScale;
     float size = base * (1.0 + wConst * isCore * 0.8 + hl * 1.1 + wLight * (1.0 - isRing) * 1.4 + wSpread * 0.7 + wMind * 0.25)
                + rippleBoost * 2.5 + push * 1.6 + firing * 2.0;
+    size *= 1.0 + uTransition * .25;
     gl_PointSize = size * uPixelRatio * min(8.0 / max(1.0, -mv.z), 1.7);
 
     // fade with distance, and fade spread-out ground near the camera so it never crowds the text
-    float depthFade = smoothstep(24.0, 3.0, -mv.z) * mix(1.0, smoothstep(2.5, 7.0, -mv.z), wSpread);
+    float depthFade = (1.0 - smoothstep(3.0, 24.0, -mv.z)) * mix(1.0, smoothstep(2.5, 7.0, -mv.z), wSpread);
     float twinkle = 0.78 + 0.22 * sin(t * 1.7 + aSeed * 60.0);
     float lightDensity = mix(1.0, mix(uLightDensity, 1.0, isRing), wLight);
     vAlpha = depthFade * mix(0.5, 0.15, uCalm) * lightDensity * twinkle * (1.0 + hl * 1.4 + firing * 2.0 + wSpread * 1.1 + wMind * 0.9);
+    vAlpha *= mix(1.0, .2 + aPortraitBrightness * 1.8, wBrain * uPortrait);
+    vAlpha *= 1.0 + uTransition * .25;
     vAccent = clamp(wLight * (1.0 - isRing * 0.5) + rippleBoost * 0.85 + hl + firing + push * 0.6, 0.0, 1.0);
   }
 `;
@@ -174,7 +208,7 @@ const FRAGMENT_SHADER = /* glsl */ `
     vec2 uv = gl_PointCoord - vec2(0.5);
     float d = length(uv);
     if (d > 0.5) discard;
-    float soft = pow(smoothstep(0.5, 0.0, d), 1.8);
+    float soft = pow((1.0 - smoothstep(0.0, 0.5, d)), 1.8);
     vec3 bone = vec3(0.929, 0.918, 0.890);
     vec3 signal = vec3(0.353, 0.820, 1.000);
     gl_FragColor = vec4(mix(bone, signal, vAccent), soft * vAlpha);
@@ -253,6 +287,9 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
     const attr = (arr: Float32Array, size = 3) => new THREE.BufferAttribute(arr, size);
     geometry.setAttribute('position', attr(forms.list[FORMATION.mind]));
     geometry.setAttribute('aBrain', attr(forms.list[FORMATION.brain]));
+    geometry.setAttribute('aPortrait', attr(new Float32Array(count * 3)));
+    geometry.setAttribute('aPortraitBrightness', attr(new Float32Array(count).fill(1), 1));
+    geometry.setAttribute('aLink', attr(forms.link, 1));
     geometry.setAttribute('aTriad', attr(forms.list[FORMATION.triad]));
     geometry.setAttribute('aConst', attr(forms.list[FORMATION.constellation]));
     geometry.setAttribute('aLand', attr(forms.list[FORMATION.highlands]));
@@ -270,6 +307,12 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       uniforms: {
+        uViewBasis: { value: new THREE.Matrix3() },
+        uBrainTarget: { value: v3(layout.brainCenter) }, uBrainScale: { value: 1 },
+        uTriadTarget: { value: layout.triadCenters.map(v3) }, uTriadScale: { value: [1, 1, 1] },
+        uStarTarget: { value: layout.starCenters.map(v3) }, uStarBase: { value: layout.starCenters.map(v3) }, uStarScale: { value: [1, 1, 1, 1] },
+        uLightTarget: { value: v3(layout.pointCenter) }, uLightScale: { value: 1 },
+        uPortrait: { value: 0 }, uTransition: { value: 0 },
         uTime: { value: 0 },
         uFrom: { value: 0 },
         uTo: { value: 0 },
@@ -302,11 +345,39 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
     scene.add(points);
 
     let composer: EffectComposer | null = null;
+    let bloomPass: UnrealBloomPass | null = null;
     let bloomEnabled = !software && !isMobile;
     if (bloomEnabled) {
       composer = new EffectComposer(renderer);
       composer.addPass(new RenderPass(scene, camera));
-      composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), 0.38, 0.45, 0.72));
+      bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), 0.38, 0.45, 0.72);
+      composer.addPass(bloomPass);
+    }
+
+    const anchors = new AnchorTracker();
+    let disposed = false;
+    let portrait: HTMLImageElement | undefined;
+    if (sceneRef.current.portrait) {
+      portrait = new Image(); portrait.crossOrigin = 'anonymous';
+      portrait.onload = () => {
+        if (disposed || !portrait) return;
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = 160; canvas.height = Math.max(1, Math.round(160 * portrait.naturalHeight / portrait.naturalWidth));
+          canvas.height = Math.min(240, canvas.height);
+          const context = canvas.getContext('2d', { willReadFrequently: true });
+          if (!context) return;
+          context.drawImage(portrait, 0, 0, canvas.width, canvas.height);
+          const sampled = samplePortrait(context.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height, count);
+          if (!sampled) return;
+          (geometry.getAttribute('aPortrait') as THREE.BufferAttribute).copyArray(sampled.positions).needsUpdate = true;
+          (geometry.getAttribute('aPortraitBrightness') as THREE.BufferAttribute).copyArray(sampled.brightness).needsUpdate = true;
+          material.uniforms.uPortrait.value = 1;
+          container.dataset.portrait = 'sampled';
+        } catch { container.dataset.portrait = 'brain-fallback'; }
+      };
+      portrait.onerror = () => { container.dataset.portrait = 'brain-fallback'; };
+      portrait.src = sceneRef.current.portrait;
     }
 
     // when the layout flips between phone and desktop, rebuild the shapes
@@ -320,6 +391,7 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         a.needsUpdate = true;
       });
       const u = material.uniforms;
+      u.uStarBase.value = layout.starCenters.map(v3);
       u.uOrbCenter.value = v3(layout.orbCenter);
       u.uBrainCenter.value = v3(layout.brainCenter);
       u.uLightCenter.value = v3(layout.pointCenter);
@@ -390,6 +462,34 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
     const parallax = new THREE.Vector2(0, 0);
     const look = new THREE.Vector3(0, 0, 0);
 
+    const worldA = new THREE.Vector3(), worldB = new THREE.Vector3();
+    let debugAt = 0;
+    const debug = new URLSearchParams(window.location.search).has('sceneDebug');
+    const updateAnchors = (now: number) => {
+      const u = material.uniforms, width = window.innerWidth, height = window.innerHeight;
+      const diagnostics: Record<string, unknown> = {};
+      const anchor = (name: string, target: THREE.Vector3, bounds: [number, number], fallback: [number, number, number]) => {
+        const rect = anchors.rectangles.get(name);
+        if (!rect) { target.set(...fallback); return 1; }
+        const x = rect.left - window.scrollX + rect.width / 2, y = rect.top - window.scrollY + rect.height / 2;
+        screenToWorld(x, y, width, height, camera, target);
+        screenToWorld(x + rect.width / 2, y, width, height, camera, worldA);
+        screenToWorld(x, y + rect.height / 2, width, height, camera, worldB);
+        const scale = Math.min(worldA.distanceTo(target) * 2 / bounds[0], worldB.distanceTo(target) * 2 / bounds[1]);
+        if (debug && now - debugAt > .2) {
+          const projected = target.clone().project(camera);
+          diagnostics[name] = { x, y, projectedX: (projected.x + 1) * width / 2, projectedY: (1 - projected.y) * height / 2, width: rect.width, height: rect.height, scale };
+        }
+        return scale;
+      };
+      u.uBrainScale.value = anchor('brain', u.uBrainTarget.value, [3.4, 3], layout.brainCenter);
+      for (let i = 0; i < 3; i++) u.uTriadScale.value[i] = anchor(`discipline-${i}`, u.uTriadTarget.value[i], [2.1, 1.9], layout.triadCenters[i]);
+      for (let i = 0; i < 4; i++) u.uStarScale.value[i] = anchor(`work-${i}`, u.uStarTarget.value[i], [2.3, 2.3], layout.starCenters[i]);
+      u.uLightScale.value = anchor('light', u.uLightTarget.value, [2.5, 2.5], layout.pointCenter);
+      (u.uViewBasis.value as THREE.Matrix3).setFromMatrix4(camera.matrixWorld);
+      if (debug && now - debugAt > .2) { container.dataset.anchors = JSON.stringify(diagnostics); debugAt = now; }
+    };
+
     const formationAt = (forms: number[], i: number) => forms[Math.max(0, Math.min(forms.length - 1, i))] ?? FORMATION.dust;
 
     function frame() {
@@ -407,8 +507,9 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
       if (!hidden) {
         const st = sceneRef.current;
         const calm = modeRef.current === 'calm';
-        const formsBySection = calm ? [FORMATION.dust] : st.formations;
-        const targetStage = calm ? 0 : st.stage;
+        const lost = modeRef.current === 'lost';
+        const formsBySection = calm ? [FORMATION.dust] : lost ? [FORMATION.dust, FORMATION.mind] : st.formations;
+        const targetStage = calm ? 0 : lost ? .55 : st.stage;
 
         curStage = THREE.MathUtils.damp(curStage, targetStage, 3.2, dt);
         curCalm = THREE.MathUtils.damp(curCalm, calm ? 1 : 0, 3.5, dt);
@@ -420,6 +521,7 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         const to = formationAt(formsBySection, fi + 1);
         const mix = Math.min(1, Math.max(0, curStage - fi));
         const weightOf = (f: number) => (from === f ? 1 - mix : 0) + (to === f ? mix : 0);
+        const pulse = from !== to ? Math.sin(mix * Math.PI) : 0;
         const wLand = weightOf(FORMATION.highlands);
         const wLight = weightOf(FORMATION.light);
 
@@ -429,6 +531,8 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         hl4Amt = THREE.MathUtils.damp(hl4Amt, st.hl4 >= 0 ? 1 : 0, 7, dt);
 
         const u = material.uniforms;
+        u.uTransition.value = pulse;
+        if (bloomPass) bloomPass.strength = .38 + pulse * .6;
         u.uTime.value = now;
         u.uFrom.value = from;
         u.uTo.value = to;
@@ -447,12 +551,14 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         parallax.lerp(curMouseStrength > 0.01 ? mouseTarget : new THREE.Vector2(0, 0), 1 - Math.exp(-2 * dt));
         const camX = (curDrift - 0.5) * 7 * wLand + parallax.x * 0.3 * (1 - curCalm);
         const camY = 0.2 + 0.9 * wLand + parallax.y * 0.18 * (1 - curCalm);
-        const camZ = 7.5 - 1.1 * wLand - 0.6 * wLight;
+        const camZ = 7.5 - 1.1 * wLand - 0.6 * wLight - pulse * .55;
         camera.position.x = THREE.MathUtils.damp(camera.position.x, camX, 3, dt);
         camera.position.y = THREE.MathUtils.damp(camera.position.y, camY, 3, dt);
         camera.position.z = THREE.MathUtils.damp(camera.position.z, camZ, 3, dt);
         look.set(camX * 0.8, -0.9 * wLand, -1.5 * wLand);
         camera.lookAt(look);
+        camera.updateMatrixWorld();
+        updateAnchors(now);
 
         if (bloomEnabled && composer) composer.render();
         else renderer.render(scene, camera);
@@ -471,6 +577,9 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
       document.removeEventListener('pointerleave', onPointerLeave);
       window.removeEventListener('resize', onResize);
       document.removeEventListener('visibilitychange', onVisibility);
+      disposed = true;
+      if (portrait) { portrait.onload = null; portrait.onerror = null; }
+      anchors.dispose();
       geometry.dispose();
       material.dispose();
       composer?.dispose();

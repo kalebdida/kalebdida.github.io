@@ -130,3 +130,57 @@ test('static routes and feeds exclude drafts and external post routes', async ()
   assert.ok(html.includes(`${data.identity.shortName} (${data.identity.handle})`));
   assert.ok(html.includes('href="https://kalebdida.github.io/"'));
 });
+
+
+test('home writing excludes outlines and drafts, while keeping published notes and link-outs', async () => {
+  const { selectHomePosts } = await import('./logic');
+  const published = { ...posts[0], status: 'published' as const, date: '2026-10-20' };
+  const link = { ...posts[1], external: { url: 'https://medium.com/example', platform: 'medium' as const }, date: '2026-10-22' };
+  const draft = { ...published, draft: true, date: '2026-10-23' };
+  assert.deepEqual(selectHomePosts([...posts, published, link, draft]).map(post => post.slug), [link.slug, published.slug]);
+  assert.equal(selectHomePosts([link, published], 1).length, 1);
+  assert.equal(selectHomePosts(posts).length, 0);
+});
+
+test('DOM screen anchors round-trip through the live camera at every requested width', async () => {
+  const { screenToWorld } = await import('../three/anchors');
+  const { PerspectiveCamera } = await import('three');
+  for (const width of [390, 768, 1280, 1440, 1920]) {
+    const height = width === 390 ? 844 : 900;
+    const camera = new PerspectiveCamera(50, width / height, .1, 60);
+    camera.position.set(.3, .2, 6.8); camera.lookAt(.1, 0, 0); camera.updateMatrixWorld();
+    for (const [x, y] of [[40, 80], [width / 2, height / 2], [width - 60, height - 90]]) {
+      const point = screenToWorld(x, y, width, height, camera);
+      assert.ok(Math.abs(point.z) < 1e-10);
+      const projected = point.project(camera);
+      assert.ok(Math.abs((projected.x + 1) * width / 2 - x) < 1e-7);
+      assert.ok(Math.abs((1 - projected.y) * height / 2 - y) < 1e-7);
+    }
+  }
+});
+
+test('portrait sampling is finite, deterministic and handles transparent images', async () => {
+  const { samplePortrait } = await import('../three/anchors');
+  const pixels = new Uint8ClampedArray([255, 255, 255, 255, 0, 0, 0, 0, 180, 180, 180, 255, 0, 0, 0, 0]);
+  const sampled = samplePortrait(pixels, 2, 2, 300)!;
+  assert.equal(sampled.positions.length, 900);
+  assert.ok(sampled.positions.every(Number.isFinite));
+  assert.ok(sampled.positions.filter((_, i) => i % 3 === 0).every(x => x <= 0));
+  assert.deepEqual(samplePortrait(pixels, 2, 2, 300), sampled);
+  assert.equal(samplePortrait(new Uint8ClampedArray(16), 2, 2, 30), null);
+});
+
+test('the lock shackle stays above its body and constellation links retain interpolation', () => {
+  const layout = makeLayout(false), forms = buildFormations(3000, layout);
+  const lockY = { body: [] as number[], shackle: [] as number[] };
+  for (let i = 0; i < forms.group.length; i++) {
+    if (Math.floor(forms.group[i] * 3) !== 1) continue;
+    const y = forms.list[FORMATION.triad][i * 3 + 1] - layout.triadCenters[1][1];
+    if (forms.seed[i] < .62) lockY.body.push(y);
+    else if (forms.seed[i] < .9) lockY.shackle.push(y);
+  }
+  const average = (items: number[]) => items.reduce((a, b) => a + b, 0) / items.length;
+  assert.ok(average(lockY.shackle) > average(lockY.body) + .3);
+  assert.ok(forms.link.some(t => t >= 0));
+  assert.ok(forms.link.every(t => t === -1 || t >= 0 && t <= 1));
+});
