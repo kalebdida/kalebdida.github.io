@@ -12,7 +12,7 @@ for (const route of data.routes) {
   mkdirSync(join(dist, route.path), { recursive: true });
   writeFileSync(join(dist, route.path, 'index.html'), renderPage(template, route, data));
 }
-writeFileSync(join(dist, '404.html'), readFileSync(join(dist, 'index.html')));
+writeFileSync(join(dist, '404.html'), renderPage(template, { path: '404.html', title: `Page not found, ${data.identity.shortName}`, description: 'This page wandered off. Follow the particles home.' }, data));
 writeFileSync(join(dist, '.nojekyll'), '');
 writeFileSync(join(dist, 'rss.xml'), data.rss);
 writeFileSync(join(dist, 'sitemap.xml'), data.sitemap);

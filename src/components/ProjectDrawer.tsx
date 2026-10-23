@@ -1,3 +1,4 @@
+import { Photo } from './Photo';
 import { useDialog } from '../utils/useDialog';
 import { type ProjectCaseFile } from '../data/siteData';
 
@@ -58,6 +59,8 @@ export function ProjectDrawer({ project, onClose }: ProjectDrawerProps) {
               {project.status}
             </p>
           </header>
+
+          {project.photo && <Photo src={project.photo} alt={project.title} sizes="(min-width: 680px) 584px, calc(100vw - 48px)" className="drawer-photo mt-10" />}
 
           <p className="t-lead text-bone/90 mt-10">{project.whatItIs}</p>
 
