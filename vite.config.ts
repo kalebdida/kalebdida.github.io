@@ -5,9 +5,37 @@ import { basename } from 'node:path';
 import { defineConfig } from 'vite';
 import { parsePost } from './scripts/content.mjs';
 import { siteArtifacts, renderPage } from './scripts/site-content.mjs';
+import { preparePhotos } from './scripts/photos.mjs';
 
 export default defineConfig(() => ({
   plugins: [
+    (() => {
+      let prepared: Awaited<ReturnType<typeof preparePhotos>> | undefined;
+      const id = '\0virtual:photos';
+      return {
+        name: 'responsive-photos',
+        resolveId(source: string) { if (source === 'virtual:photos') return id; },
+        async load(source: string) {
+          if (source !== id) return;
+          prepared = await preparePhotos(import.meta.dirname);
+          if (this.environment.config.command === 'build') for (const [path, bytes] of prepared.assets) this.emitFile({ type: 'asset', fileName: path.slice(1), source: bytes });
+          return `export default ${JSON.stringify(prepared.manifest)};`;
+        },
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            const asset = prepared?.assets.get(req.url?.split('?')[0] ?? '');
+            if (!asset) return next();
+            res.setHeader('Content-Type', 'image/webp'); res.end(asset);
+          });
+        },
+        handleHotUpdate(ctx) {
+          if (!ctx.file.includes('/content/') && !ctx.file.includes('/public/uploads/')) return;
+          const module = ctx.server.moduleGraph.getModuleById(id);
+          if (module) ctx.server.moduleGraph.invalidateModule(module);
+          ctx.server.ws.send({ type: 'full-reload' });
+        },
+      };
+    })(),
     {
       name: 'cms-markdown',
       enforce: 'pre',

@@ -13,7 +13,7 @@
     "intro": "I'm Kal, an aspiring cognitive scientist from Adama. I build human-centered software, play CTFs, and want to become an AI engineer."
   },
   "about": {
-    "lead": "I care about three things that turn out to be one thing: how minds work, how to build machines that think, and how to keep those machines safe.",
+    "lead": "How minds work, how machines think, and how to keep those machines safe.",
     "paragraphs": [
       "I graduated from Adama Science and Technology University Special School (ASTU SPS) in July 2026, first in my section every year. This is my gap year before studying cognitive science: I’m building Logbook, competing in CTFs, and teaching weekly Bible lessons to kids in my neighborhood.",
       "Logbook is what I’m building right now. It’s a private, offline-first journal with an AI companion that asks me a question every day and remembers past entries and photos. It’s how I’ve been exploring whether software can support memory and self-reflection.",
@@ -36,30 +36,32 @@
         "key": "Speaks",
         "value": "Amharic, English, Afaan Oromoo"
       }
-    ]
+    ],
+    "homeParagraph": "I’m spending my gap year building Logbook, competing in CTFs and teaching Bible lessons in my neighborhood.",
+    "photo": ""
   },
   "disciplines": [
     {
       "id": "mind",
       "title": "AI and cognitive science",
-      "text": "How minds remember, and how software can help. Logbook’s companion is my experiment in autobiographical memory. ThinkNeuro was my first research."
+      "text": "Autobiographical memory, self-reflection and human-centered AI."
     },
     {
       "id": "security",
       "title": "Cybersecurity",
-      "text": "Selected for the INSA cyber talent program in grade 10. Three CTF contests so far, best finish 9th of 53 teams."
+      "text": "How systems fail, how attackers think, and how to defend."
     },
     {
       "id": "embedded",
       "title": "Robotics",
-      "text": "In 2023 I led a team of four building a robot that senses and steers around obstacles. My first look at the perception-action loop."
+      "text": "Sensors, motor control and the perception-action loop."
     }
   ],
   "offScreen": [
     {
       "id": "music",
       "label": "Keyboard and guitar",
-      "text": "I play both. Turn the sound on and the keys a to k on your keyboard play soft notes."
+      "text": "I play keyboard and guitar."
     },
     {
       "id": "football",
@@ -69,12 +71,12 @@
     {
       "id": "writing",
       "label": "Writing",
-      "text": "Lowercase journals on my Telegram channel. A piece on discipline in the digital age won an international prize."
+      "text": "Journals on my Telegram channel."
     },
     {
       "id": "teaching",
       "label": "Teaching",
-      "text": "Sunday lessons for 12 kids in my neighborhood, and a summer school for 36 students."
+      "text": "Weekly Bible lessons in my neighborhood."
     }
   ],
   "now": {
@@ -120,5 +122,11 @@
       "handle": "Field notes feed",
       "href": "/rss.xml"
     }
+  ],
+  "keywords": [
+    "Cognitive science",
+    "Security",
+    "Robotics",
+    "Writing"
   ]
 }

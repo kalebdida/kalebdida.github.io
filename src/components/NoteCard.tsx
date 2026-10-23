@@ -3,7 +3,7 @@ import { type BlogPost } from '../data/siteData';
 
 function meta(post: BlogPost): string {
   if (post.external) return `On ${post.external.platform === 'medium' ? 'Medium' : 'Substack'}`;
-  if (post.status === 'outline') return 'Outline, not written yet';
+  if (post.status === 'outline') return 'Note in progress';
   return `${post.readingTimeMin ?? 1} min read`;
 }
 
@@ -22,6 +22,6 @@ export function NoteCard({ post, onOpen }: { post: BlogPost; onOpen: (slug: stri
     </span>
   </>;
   const cls = 'note-card group w-full text-left py-8 flex items-start justify-between gap-6';
-  return post.external ? <a href={post.external.url} target="_blank" rel="noopener noreferrer" className={cls}>{body}</a> :
-    <a href={`/blog/${post.slug}`} onClick={event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onOpen(post.slug); } }} className={cls}>{body}</a>;
+  return post.external ? <a href={post.external.url} target="_blank" rel="noopener noreferrer" data-cursor="Read" className={cls}>{body}</a> :
+    <a data-cursor="Read" href={`/blog/${post.slug}`} onClick={event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); onOpen(post.slug); } }} className={cls}>{body}</a>;
 }

@@ -90,3 +90,10 @@ export function updateKeystrokeBuffer(
   if (nextBuffer.endsWith('siuuu')) return { nextBuffer: '', triggered: 'siuuu' };
   return { nextBuffer, triggered: null };
 }
+
+
+/** Only finished local writing and public link-outs belong on the home page. */
+export function selectHomePosts(posts: BlogPost[], limit = 3): BlogPost[] {
+  return posts.filter(post => !post.draft && (post.status === 'published' || !!post.external))
+    .sort((a, b) => b.date.localeCompare(a.date)).slice(0, Math.max(0, limit));
+}

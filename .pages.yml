@@ -1,11 +1,10 @@
-# Open this configuration on the source branch in Pages CMS.
-# Branch selection belongs to Pages CMS, not to a YAML branch setting.
+# In Pages CMS, choose the source branch before editing.
 media:
   input: public/uploads
   output: /uploads
 content:
   - name: posts
-    label: Field notes
+    label: "Posts: write or link"
     type: collection
     path: content/posts
     format: yaml-frontmatter
@@ -29,26 +28,31 @@ content:
         label: Title
         type: string
         required: true
+        description: Give your post a clear title.
       - name: date
         label: Date
         type: date
         required: true
         options:
           format: yyyy-MM-dd
+        description: Choose the publication date. Use the actual date, not a guessed one.
       - name: summary
         label: Summary
         type: text
         required: true
+        description: A short introduction shown on note cards and in the feed.
       - name: tags
         label: Tags
         type: string
         list: true
         required: true
+        description: Add a few topics, such as Robotics or Cognitive science.
       - name: draft
         label: Draft (hidden from the site and feeds)
         type: boolean
         default: true
         required: true
+        description: Keep this on while writing. Turn it off to make the post public.
       - name: status
         label: Status
         type: select
@@ -58,15 +62,20 @@ content:
           values:
             - outline
             - published
+        description: Published means the piece is ready. Outline shows a gentle
+          in-progress note and stays off the home page.
       - name: thumbnail
         label: Thumbnail
         type: image
+        description: Upload an image here. Leave blank for a patterned cover.
       - name: external_url
         label: External URL (leave blank for a local post)
         type: string
         pattern:
           regex: ^$|^https://
           message: Use a full HTTPS URL.
+        description: Leave empty unless this post lives on Medium or Substack. Paste the
+          full HTTPS link to that piece.
       - name: external_platform
         label: External platform
         type: select
@@ -74,9 +83,48 @@ content:
           values:
             - medium
             - substack
+        description: Leave empty for a post written here. Choose Medium or Substack for
+          a link post.
       - name: body
-        label: Post body
+        label: Write your post
         type: rich-text
+        description: Write your post here. Use Heading 2 for sections. For a link post,
+          this can stay empty.
+    description: Write a note here, or add a link to a piece on Medium or Substack.
+      Save on the source branch.
+  - name: gallery
+    label: "Photos: Moments gallery"
+    description: Upload your photographs here. There are no stock or sample photos
+      on the site.
+    type: file
+    path: content/gallery.json
+    format: json
+    list: true
+    fields:
+      - name: image
+        label: Upload a photograph
+        type: image
+        required: true
+        description: Choose an image from Media or upload a new one. Files live in
+          public/uploads.
+      - name: caption
+        label: Caption
+        type: text
+        description: Describe the photograph. Also used as its accessible description.
+      - name: date
+        label: Date
+        type: date
+        options:
+          format: yyyy-MM-dd
+        description: When was the photo taken? Leave blank if you do not know.
+      - name: location
+        label: Location
+        type: string
+        description: Optional. Add the place only if you want it public.
+      - name: tag
+        label: Tag
+        type: string
+        description: Optional. A short topic for this photograph.
   - name: site
     label: Site
     type: file
@@ -127,10 +175,12 @@ content:
           - name: lead
             label: Lead
             type: text
+            description: One strong lead sentence for About.
           - name: paragraphs
             label: Paragraphs
             type: text
             list: true
+            hidden: true
           - name: facts
             label: Facts
             type: object
@@ -142,6 +192,15 @@ content:
                 label: Value
                 type: string
             list: true
+          - name: homeParagraph
+            label: About paragraph on home
+            type: text
+            description: Write one short paragraph. This is the paragraph visitors see.
+          - name: photo
+            label: Portrait
+            type: image
+            description: Optional. Upload a portrait. The site also turns it into particles;
+              the brain remains when no photo is uploaded.
       - name: disciplines
         label: Disciplines
         type: object
@@ -209,6 +268,11 @@ content:
             label: Href
             type: string
         list: true
+      - name: keywords
+        label: Moving keyword line
+        type: string
+        list: true
+        description: Short topics shown between About and What I do.
   - name: projects
     label: Projects
     type: file
@@ -276,6 +340,15 @@ content:
             label: Href
             type: string
         list: true
+      - name: homeSummary
+        label: Short home-page summary
+        type: text
+        description: One sentence. Detailed descriptions remain inside the case file.
+      - name: photo
+        label: Project photo
+        type: image
+        description: Optional. Upload a real project image for the hover preview and
+          case file.
   - name: journey
     label: Journey
     type: file
@@ -300,6 +373,17 @@ content:
       - name: note
         label: Note
         type: text
+      - name: showOnHome
+        label: Show on home page
+        type: boolean
+        default: false
+        description: Turn on to include this item on the home page. The full resume
+          keeps all entries.
+      - name: homeSummary
+        label: Short home-page line
+        type: text
+        description: One short line for the home page. Keep full details in the other
+          fields.
   - name: recognition
     label: Recognition
     type: file
@@ -316,6 +400,17 @@ content:
       - name: scope
         label: Scope
         type: string
+      - name: showOnHome
+        label: Show on home page
+        type: boolean
+        default: false
+        description: Turn on to include this item on the home page. The full resume
+          keeps all entries.
+      - name: homeDetail
+        label: Short home-page detail
+        type: text
+        description: A short description for the home page. The full detail remains on
+          the resume.
   - name: resume
     label: Resume
     type: file

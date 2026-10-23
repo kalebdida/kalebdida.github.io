@@ -4,6 +4,7 @@ import projects from '../../content/projects.json';
 import journey from '../../content/journey.json';
 import recognition from '../../content/recognition.json';
 import resume from '../../content/resume.json';
+import gallery from '../../content/gallery.json';
 import { CTF } from './constants';
 
 export type ProjectStatus = 'In use, still building' | 'Building' | 'Done' | 'Presented';
@@ -17,6 +18,8 @@ export interface ProjectCaseFile {
   kind: string;
   summary: string;
   whatItIs: string;
+  homeSummary?: string;
+  photo?: string;
   built: string[];
   next?: string[];
   stack?: string[];
@@ -27,15 +30,27 @@ export interface ProjectCaseFile {
 export interface JourneyMilestone {
   id: string;
   when: string;
+  showOnHome: boolean;
+  homeSummary?: string;
   title: string;
   place?: string;
   note?: string;
 }
 
 export interface RecognitionItem {
+  showOnHome: boolean;
+  homeDetail?: string;
   title: string;
   detail: string;
   scope?: string;
+}
+
+export interface GalleryItem {
+  image: string;
+  caption: string;
+  date?: string;
+  location?: string;
+  tag?: string;
 }
 
 export interface OffScreenNote {
@@ -81,6 +96,7 @@ export const SITE_DATA = {
   journey: journey as JourneyMilestone[],
   recognition: recognition as RecognitionItem[],
   resume,
+  gallery: gallery as GalleryItem[],
   posts,
   ctf: CTF,
 };

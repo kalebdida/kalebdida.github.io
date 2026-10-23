@@ -2,25 +2,35 @@
   {
     "title": "1st place",
     "detail": "The World in Us writing competition, for a piece on teaching discipline in the digital age",
-    "scope": "International"
+    "scope": "International",
+    "showOnHome": true,
+    "homeDetail": "The World in Us writing competition."
   },
   {
     "title": "2nd place",
     "detail": "STEMpower program",
-    "scope": "Citywide"
+    "scope": "Citywide",
+    "showOnHome": false,
+    "homeDetail": ""
   },
   {
     "title": "4th place",
     "detail": "National online English competition",
-    "scope": "National"
+    "scope": "National",
+    "showOnHome": false,
+    "homeDetail": ""
   },
   {
     "title": "Stage 4 of 6",
     "detail": "National mathematics olympiad",
-    "scope": "National"
+    "scope": "National",
+    "showOnHome": false,
+    "homeDetail": ""
   },
   {
     "title": "9th of 53",
-    "detail": "Best team finish in a capture the flag contest"
+    "detail": "Best team finish in a capture the flag contest",
+    "showOnHome": true,
+    "homeDetail": "A team finish in capture the flag."
   }
 ]

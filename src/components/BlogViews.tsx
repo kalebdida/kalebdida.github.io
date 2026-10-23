@@ -16,7 +16,7 @@ function formatDate(iso: string): string {
 }
 
 function postMeta(post: BlogPost): string {
-  return post.status === 'outline' ? 'Outline, not written yet' : `${post.readingTimeMin ?? 1} min read`;
+  return post.status === 'outline' ? 'Note in progress' : `${post.readingTimeMin ?? 1} min read`;
 }
 
 export function BlogIndexView({ onSelectPost, onNavigateHome }: BlogIndexProps) {
@@ -74,7 +74,7 @@ export function BlogIndexView({ onSelectPost, onNavigateHome }: BlogIndexProps) 
 
       {grouped.length === 0 ? (
         <div className="py-16">
-          <p className="t-body text-ash">Nothing matches that search.</p>
+          <p className="t-body text-ash">{searchQuery || activeTag !== 'all' ? 'Nothing matches that search.' : 'New notes coming soon.'}</p>
           <button
             type="button"
             onClick={() => {
@@ -187,7 +187,7 @@ export function BlogPostView({ post, onBackToIndex, onSelectPost }: BlogPostView
 
       {post.status === 'outline' && (
         <p data-reveal="up" className="outline-callout mt-12 t-ui text-ash max-w-[52ch]">
-          This note is still an outline. The full piece is coming.
+          New notes coming soon. Here’s what I’m thinking about.
         </p>
       )}
 

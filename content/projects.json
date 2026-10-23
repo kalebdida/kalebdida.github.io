@@ -33,7 +33,9 @@
         "label": "Source on GitHub",
         "href": "https://github.com/kalebdida/logbook"
       }
-    ]
+    ],
+    "homeSummary": "A private, offline-first journal with an AI companion.",
+    "photo": ""
   },
   {
     "id": "02",
@@ -50,7 +52,9 @@
       "Helped build the data visualizations for the team poster.",
       "Presented at the ThinkNeuro research symposium."
     ],
-    "role": "Summer research intern, co-author"
+    "role": "Summer research intern, co-author",
+    "homeSummary": "Research on adolescent mental health, wearable nanotechnology and biofeedback.",
+    "photo": ""
   },
   {
     "id": "03",
@@ -66,7 +70,9 @@
       "Debugged both the hardware and the code.",
       "Tested a working prototype."
     ],
-    "role": "Project lead, team of four"
+    "role": "Project lead, team of four",
+    "homeSummary": "An obstacle-avoiding robot, built with a team of four.",
+    "photo": ""
   },
   {
     "id": "04",
@@ -78,6 +84,8 @@
     "whatItIs": "An app that shows nearby churches and every church in Addis Ababa. Addis first, then other cities.",
     "built": [
       "Early build in progress, made with AI coding agents (Claude and Codex) working on the same repo."
-    ]
+    ],
+    "homeSummary": "Finding nearby churches, starting in Addis Ababa.",
+    "photo": ""
   }
 ]

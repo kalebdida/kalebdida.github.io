@@ -3,73 +3,97 @@
     "id": "saint-joseph",
     "when": "Middle school",
     "title": "Saint Joseph Catholic School",
-    "place": "Adama"
+    "place": "Adama",
+    "showOnHome": false,
+    "homeSummary": ""
   },
   {
     "id": "pj-masks",
     "when": "Grades 7 to 10",
     "title": "Part-time at PJ Masks Playground",
     "place": "Adama",
-    "note": "Waiter, cashier and children’s play attendant, mostly on Saturdays, for four years."
+    "note": "Waiter, cashier and children’s play attendant, mostly on Saturdays, for four years.",
+    "showOnHome": false,
+    "homeSummary": ""
   },
   {
     "id": "debate",
     "when": "Grades 9 to 12",
     "title": "Debate club",
-    "note": "Researched and argued three team rounds on school systems. We won."
+    "note": "Researched and argued three team rounds on school systems. We won.",
+    "showOnHome": false,
+    "homeSummary": ""
   },
   {
     "id": "robot",
     "when": "2023",
     "title": "Led a robotics team",
-    "note": "Four of us built a robot that detects and steers around obstacles."
+    "note": "Four of us built a robot that detects and steers around obstacles.",
+    "showOnHome": true,
+    "homeSummary": "A team of four. One robot."
   },
   {
     "id": "insa",
     "when": "Grade 10",
     "title": "INSA cyber talent program",
-    "note": "Selected trainee in the national program for young technical talent. Studied how systems fail, how attackers think, and how to defend."
+    "note": "Selected trainee in the national program for young technical talent. Studied how systems fail, how attackers think, and how to defend.",
+    "showOnHome": true,
+    "homeSummary": "Learning how systems fail."
   },
   {
     "id": "ctf",
     "when": "Grade 10 to now",
     "title": "Capture the flag",
-    "note": "Three contests so far, solo and on teams. Best finish: 9th of 53 teams."
+    "note": "Three contests so far, solo and on teams. Best finish: 9th of 53 teams.",
+    "showOnHome": false,
+    "homeSummary": ""
   },
   {
     "id": "bible",
     "when": "Grade 10 to now",
     "title": "Volunteer Bible teacher",
-    "note": "Weekly Sunday lessons for 12 neighborhood children."
+    "note": "Weekly Sunday lessons for 12 neighborhood children.",
+    "showOnHome": false,
+    "homeSummary": ""
   },
   {
     "id": "thinkneuro",
     "when": "Grade 11",
     "title": "Research intern at ThinkNeuro",
-    "note": "A bibliometric review on adolescent depression and anxiety, presented at the ThinkNeuro research symposium."
+    "note": "A bibliometric review on adolescent depression and anxiety, presented at the ThinkNeuro research symposium.",
+    "showOnHome": true,
+    "homeSummary": "A summer in neuroscience."
   },
   {
     "id": "peace-club",
     "when": "Grade 12",
     "title": "Founded the Peace Club",
-    "note": "YMCA-affiliated, at my school. Grew it to 63 members and led two sessions a week on gender-based violence and peacekeeping."
+    "note": "YMCA-affiliated, at my school. Grew it to 63 members and led two sessions a week on gender-based violence and peacekeeping.",
+    "showOnHome": true,
+    "homeSummary": "Founding a Peace Club."
   },
   {
     "id": "summer-program",
     "when": "Grade 12",
     "title": "Organized a summer school",
-    "note": "A two-month program for 36 students, over 90% of them girls, most from families who couldn’t afford tutoring. Prepared grade 6 and 8 students for national exams."
+    "note": "A two-month program for 36 students, over 90% of them girls, most from families who couldn’t afford tutoring. Prepared grade 6 and 8 students for national exams.",
+    "showOnHome": false,
+    "homeSummary": ""
   },
   {
     "id": "graduated",
     "when": "July 2026",
     "title": "Graduated from ASTU SPS",
-    "note": "First in my section every year."
+    "note": "First in my section every year.",
+    "showOnHome": true,
+    "homeSummary": "Finishing school at ASTU SPS."
   },
   {
     "id": "gap-year",
     "when": "2026 to 2027",
     "title": "Gap year",
-    "note": "Building Logbook, competing in CTFs, teaching Bible lessons."
+    "note": "Building Logbook, competing in CTFs, teaching Bible lessons.",
+    "showOnHome": true,
+    "homeSummary": "A year to build, compete and teach."
   }
 ]

@@ -62,6 +62,13 @@ export function ResumeView({ onNavigateHome }: ExtraPageProps) {
             <p className="t-ui text-ash mt-4 leading-relaxed">{exp.notes}</p>
           </div>)}
         </section>
+        <details className="resume-journey resume-section" data-reveal="up">
+          <summary className="t-ui text-bone">Full journey <Arrow className="inline-block ml-2 align-middle" /></summary>
+          <ol className="mt-8">{SITE_DATA.journey.map(item => <li key={item.id} className="resume-item">
+            <p className="t-meta text-ash mb-3">{item.when}</p><h3 className="t-h3 text-bone">{item.title}</h3>
+            {item.place && <p className="t-meta text-ash mt-2">{item.place}</p>}{item.note && <p className="t-ui text-ash mt-3 leading-relaxed">{item.note}</p>}
+          </li>)}</ol>
+        </details>
         <section className="resume-section">
           <ResumeHeading>Honors and awards</ResumeHeading>
           <ul>{recognition.map(item => <li key={item.detail} data-reveal="up" className="resume-item t-ui">
