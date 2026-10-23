@@ -103,11 +103,6 @@ export function BlogIndexView({ onSelectPost, onNavigateHome }: BlogIndexProps) 
         </div>
       )}
 
-      <div className="mt-16 pt-6 border-t border-hair t-meta text-ash">
-        <a href="/rss.xml" className="link-quiet">
-          Subscribe with RSS
-        </a>
-      </div>
     </div>
   );
 }

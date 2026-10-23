@@ -6,11 +6,12 @@
     "geezName": "ካሌብ ዲዳ",
     "url": "https://kalebdida.github.io",
     "email": "kalebdida@gmail.com",
-    "city": "Adama, Ethiopia",
+    "city": "Addis Ababa, Ethiopia",
     "timeZone": "Africa/Addis_Ababa",
     "title": "Aspiring cognitive scientist. Human-centered AI and software.",
     "tagline": "Minds, machines, and the locks between them.",
-    "intro": "I'm Kal, an aspiring cognitive scientist from Adama. I build human-centered software, play CTFs, and want to become an AI engineer."
+    "intro": "I'm Kal, an aspiring cognitive scientist currently based in Addis Ababa. I build human-centered software, play CTFs, and want to become an AI engineer.",
+    "heroPhoto": "/uploads/kaleb-dida-portrait-formal.png"
   },
   "about": {
     "lead": "How minds work, how machines think, and how to keep those machines safe.",
@@ -22,7 +23,7 @@
     "facts": [
       {
         "key": "Based in",
-        "value": "Adama, Ethiopia"
+        "value": "Addis Ababa, Ethiopia"
       },
       {
         "key": "Studying next",
@@ -38,7 +39,7 @@
       }
     ],
     "homeParagraph": "I’m spending my gap year building Logbook, competing in CTFs and teaching Bible lessons in my neighborhood.",
-    "photo": ""
+    "photo": "/uploads/kaleb-dida-portrait-smiling.png"
   },
   "disciplines": [
     {
@@ -114,13 +115,18 @@
     },
     {
       "label": "Telegram",
-      "handle": "@kalebdida",
-      "href": "https://t.me/kalebdida"
+      "handle": "@CalebDida",
+      "href": "https://t.me/CalebDida"
     },
     {
-      "label": "RSS",
-      "handle": "Field notes feed",
-      "href": "/rss.xml"
+      "label": "Telegram channel",
+      "handle": "@kaleblog",
+      "href": "https://t.me/kaleblog"
+    },
+    {
+      "label": "Other platforms",
+      "handle": "@kalebdida",
+      "href": ""
     }
   ],
   "keywords": [

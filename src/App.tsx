@@ -5,6 +5,7 @@
 
 import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import Lenis from 'lenis';
+import { Moon, Sun } from 'lucide-react';
 import { SITE_DATA, type ProjectCaseFile } from './data/siteData';
 import { adamaClock, updateKeystrokeBuffer, selectHomePosts } from './utils/logic';
 import { soundEngine, PIANO_KEY_MAP } from './utils/soundEngine';
@@ -12,7 +13,7 @@ import type { SceneState } from './components/ParticleField';
 import { ProjectDrawer } from './components/ProjectDrawer';
 import { NoteCard } from './components/NoteCard';
 import { NowView, ResumeView } from './components/ExtraPages';
-import { Arrow, Motif, Rank, RevealWords, spotlight } from './components/Details';
+import { Arrow, Motif, Rank, RevealWords, SocialIcon, spotlight } from './components/Details';
 import { useDialog } from './utils/useDialog';
 import { useReveals } from './utils/useReveals';
 import { Gallery } from './components/Gallery';
@@ -154,6 +155,9 @@ export default function App() {
   );
 
   const [soundOn, setSoundOn] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try { return localStorage.getItem('kal-theme') === 'light' ? 'light' : 'dark'; } catch { return 'dark'; }
+  });
   const [activeProject, setActiveProject] = useState<ProjectCaseFile | null>(null);
   const [copiedEmail, setCopiedEmail] = useState<'Copied' | 'Copy failed' | null>(null);
   const [marqueePaused, setMarqueePaused] = useState(false);
@@ -170,6 +174,13 @@ export default function App() {
   const clock = useAdamaClock();
   const flagDialogRef = useDialog(flagFound, () => setFlagFound(false));
   useReveals();
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0A0A0C' : '#F4F1E9');
+    try { localStorage.setItem('kal-theme', theme); } catch {}
+    window.dispatchEvent(new CustomEvent('kal:theme', { detail: theme }));
+  }, [theme]);
   useEffect(() => () => { clearTimeout(copyTimer.current); clearTimeout(toastTimer.current); }, []);
   const copyEmail = async () => {
     try { await navigator.clipboard.writeText(SITE_DATA.identity.email); setCopiedEmail('Copied'); }
@@ -211,8 +222,14 @@ export default function App() {
     );
   }, []);
 
-  const celebrate = () => {
+  const celebrate = (withVoice = false) => {
     setCelebration(++celebrationId.current); setSiuuuToast(true);
+    if (withVoice && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const call = new SpeechSynthesisUtterance('Siuuuuuuu!');
+      call.rate = .72; call.pitch = 1.05; call.volume = 1;
+      window.speechSynthesis.speak(call);
+    }
     clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => setSiuuuToast(false), 2000);
   };
@@ -501,6 +518,9 @@ export default function App() {
               </button>
             ))}
           </nav>
+          <button type="button" onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')} className="theme-toggle" aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}>
+            {theme === 'dark' ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
+          </button>
           <button
             type="button"
             onClick={() => handleToggleSound()}
@@ -543,7 +563,11 @@ export default function App() {
         {route.page === 'home' && (
           <div className="max-w-6xl mx-auto px-6">
             {/* hero */}
-            <section id="hero" data-formation={FORMATION.mind} className="min-h-[100svh] flex flex-col pt-28 pb-16 sm:pb-20">
+            <section id="hero" data-formation={FORMATION.mind} className="hero-section min-h-[100svh] flex flex-col pt-28 pb-16 sm:pb-20">
+              <div className="hero-portrait-wrap intro-fade" style={delay(850)} aria-hidden="true">
+                <span className="hero-portrait-frame" />
+                <Photo src={SITE_DATA.identity.heroPhoto} alt="" eager sizes="(min-width: 1024px) 520px, 45vw" className="hero-portrait" />
+              </div>
               <div className="flex items-baseline justify-between gap-6 t-meta text-ash intro-fade" style={delay(1500)}>
                 <span>{SITE_DATA.identity.city}</span>
                 <span className="text-right">
@@ -552,7 +576,7 @@ export default function App() {
                 </span>
               </div>
 
-              <div className="mt-auto">
+              <div className="hero-copy mt-auto">
                 <h1 className="flex flex-wrap items-baseline gap-x-8 gap-y-3">
                   <span className="t-display text-bone">
                     <Letters text={SITE_DATA.identity.shortName} trigger="load" delay={420} />
@@ -737,15 +761,14 @@ export default function App() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-10">
                 {SITE_DATA.offScreen.map((item, i) => (
                   <div key={item.id} data-reveal="up" className="offscreen-card" tabIndex={0} style={delay(i * 80)}>
-                    {item.id === 'football' ? <button type="button" className="football-trigger" data-cursor="Play" onClick={celebrate} aria-label="Celebrate: Siuuu"><Motif kind="football" /></button> : <Motif kind={item.id} />}
+                    {item.id === 'football' ? <button type="button" className="football-trigger" data-cursor="Play" onClick={() => celebrate(true)} aria-label="Play Siuu celebration"><Motif kind="football" /></button> : <Motif kind={item.id} />}
                     <h3 className="t-h3 text-bone">{item.label}</h3>
                     <p className="t-body text-ash mt-2">{item.text}</p>
+                    {item.id === 'music' && <Piano soundOn={soundOn} onEnable={() => handleToggleSound(true)} />}
                     {item.id === 'football' && <p className="t-meta text-ash mt-4">Try typing <kbd className="typing-hint">siuuu</kbd>, or tap the football.</p>}
                   </div>
                 ))}
               </div>
-
-              <Piano soundOn={soundOn} onEnable={() => handleToggleSound(true)} />
             </Section>
 
             {/* contact */}
@@ -762,9 +785,9 @@ export default function App() {
                 <dl className="contact-grid mt-12 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl">
                   {SITE_DATA.socials.map((soc, i) => (
                     <div key={soc.label} data-reveal="up" style={delay(200 + i * 60)} className="contact-card">
-                      <dt className="t-meta text-ash">{soc.label}</dt>
+                      <dt className="t-meta text-ash flex items-center gap-2"><SocialIcon label={soc.label} />{soc.label}</dt>
                       <dd className="mt-2 flex items-center gap-3">
-                        <a href={soc.href} target={soc.href.startsWith('http') ? '_blank' : undefined} rel={soc.href.startsWith('http') ? 'noopener noreferrer' : undefined} className="t-ui link">{soc.handle}<Arrow className="contact-arrow ml-2 inline-block align-middle" /></a>
+                        {soc.href ? <a href={soc.href} target={soc.href.startsWith('http') ? '_blank' : undefined} rel={soc.href.startsWith('http') ? 'noopener noreferrer' : undefined} className="t-ui link">{soc.handle}<Arrow className="contact-arrow ml-2 inline-block align-middle" /></a> : <span className="t-ui text-bone">{soc.handle}</span>}
                         {soc.href.startsWith('mailto:') && <button type="button" onClick={copyEmail} className="copy-button t-meta" aria-label="Copy email address">Copy</button>}
                       </dd>
                     </div>

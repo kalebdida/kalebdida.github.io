@@ -1,7 +1,7 @@
 [
   {
     "id": "saint-joseph",
-    "when": "Middle school",
+    "when": "Before 2022",
     "title": "Saint Joseph Catholic School",
     "place": "Adama",
     "showOnHome": false,
@@ -9,7 +9,7 @@
   },
   {
     "id": "pj-masks",
-    "when": "Grades 7 to 10",
+    "when": "2020 to 2024",
     "title": "Part-time at PJ Masks Playground",
     "place": "Adama",
     "note": "Waiter, cashier and children’s play attendant, mostly on Saturdays, for four years.",
@@ -18,7 +18,7 @@
   },
   {
     "id": "debate",
-    "when": "Grades 9 to 12",
+    "when": "2022 to 2026",
     "title": "Debate club",
     "note": "Researched and argued three team rounds on school systems. We won.",
     "showOnHome": false,
@@ -34,7 +34,7 @@
   },
   {
     "id": "insa",
-    "when": "Grade 10",
+    "when": "2023 to 2024",
     "title": "INSA cyber talent program",
     "note": "Selected trainee in the national program for young technical talent. Studied how systems fail, how attackers think, and how to defend.",
     "showOnHome": true,
@@ -42,7 +42,7 @@
   },
   {
     "id": "ctf",
-    "when": "Grade 10 to now",
+    "when": "2023 to present",
     "title": "Capture the flag",
     "note": "Three contests so far, solo and on teams. Best finish: 9th of 53 teams.",
     "showOnHome": false,
@@ -50,7 +50,7 @@
   },
   {
     "id": "bible",
-    "when": "Grade 10 to now",
+    "when": "2023 to present",
     "title": "Volunteer Bible teacher",
     "note": "Weekly Sunday lessons for 12 neighborhood children.",
     "showOnHome": false,
@@ -58,7 +58,7 @@
   },
   {
     "id": "thinkneuro",
-    "when": "Grade 11",
+    "when": "2024 to 2025",
     "title": "Research intern at ThinkNeuro",
     "note": "A bibliometric review on adolescent depression and anxiety, presented at the ThinkNeuro research symposium.",
     "showOnHome": true,
@@ -66,7 +66,7 @@
   },
   {
     "id": "peace-club",
-    "when": "Grade 12",
+    "when": "2025 to 2026",
     "title": "Founded the Peace Club",
     "note": "YMCA-affiliated, at my school. Grew it to 63 members and led two sessions a week on gender-based violence and peacekeeping.",
     "showOnHome": true,
@@ -74,7 +74,7 @@
   },
   {
     "id": "summer-program",
-    "when": "Grade 12",
+    "when": "2025 to 2026",
     "title": "Organized a summer school",
     "note": "A two-month program for 36 students, over 90% of them girls, most from families who couldn’t afford tutoring. Prepared grade 6 and 8 students for national exams.",
     "showOnHome": false,

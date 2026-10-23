@@ -18,12 +18,11 @@ export function Piano({ soundOn, onEnable }: { soundOn: boolean; onEnable: () =>
     return () => { window.removeEventListener('kal:piano-ripple', ripple); window.removeEventListener('keyup', keyup); timers.current.forEach(clearTimeout); };
   }, []);
   const play = (key: string) => { if (!soundEngine.isEnabled()) onEnable(); soundEngine.playPianoNote(key); };
-  return <div className="instrument" data-reveal="up">
-    <div className="instrument-heading"><div><p className="t-h3">Your keyboard is an instrument.</p><p className="t-ui text-ash mt-3">Click a key, or turn sound on and play A S D F G H J K.</p></div><span className="note-readout t-title" aria-hidden="true">{soundOn ? note || '…' : '…'}</span></div>
-    <div className="piano" role="group" aria-label="Piano">
+  return <div className="music-keys">
+    <div className="piano" role="group" aria-label="Playable keyboard notes">
       {Object.entries(PIANO_KEY_MAP).map(([key, info]) => <button type="button" key={key} data-cursor="Play" aria-label={`Play ${info.label} ${key.toUpperCase()}`} aria-description={`Keyboard shortcut: ${key.toUpperCase()}. Enable sound first when using your keyboard.`} className={`piano-key ${keys.has(key) && soundOn ? 'is-playing' : ''}`} onPointerDown={event => { if (event.button === 0) play(key); }} onPointerEnter={event => { if (event.buttons === 1) play(key); }} onClick={event => { if (event.detail === 0) play(key); }}>
         <span className="piano-note">{info.label}</span>{' '}<kbd>{key.toUpperCase()}</kbd>
       </button>)}
-    </div><p className="t-meta text-ash mt-4">{soundOn ? 'Try a chord. Let the notes overlap.' : 'Sound starts only when you choose to play.'}</p>
+    </div><span className="sr-only" aria-live="polite">{soundOn && note ? `${note} played` : ''}</span>
   </div>;
 }

@@ -168,6 +168,10 @@ content:
           - name: intro
             label: Intro
             type: text
+          - name: heroPhoto
+            label: Hero portrait
+            type: image
+            description: Optional transparent portrait shown on the home-page opening.
       - name: about
         label: About
         type: object

@@ -39,7 +39,8 @@ Uploads live in **public/uploads/** in GitHub and are served at **/uploads/**. U
 
 ## Add a portrait or project photo
 
-- **Site → About → Portrait:** upload your portrait. It appears in About and is also sampled into the particle portrait. With no portrait, the brain formation remains. Uploads from this site work without additional services; external images that prevent canvas access keep the brain fallback.
+- **Site → Identity → Hero portrait:** upload the transparent portrait shown in the opening section.
+- **Site → About → Portrait:** upload the portrait shown in About. It is also sampled into the particle portrait. With no portrait, the brain formation remains. Uploads from this site work without additional services; external images that prevent canvas access keep the brain fallback.
 - **Projects → an item → Project photo:** upload a real project image. It appears in the hover preview and inside the case file. With no image, the preview uses a generated graphic.
 
 ## Choose what shows on home

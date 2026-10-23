@@ -203,15 +203,15 @@ const VERTEX_SHADER = /* glsl */ `
 const FRAGMENT_SHADER = /* glsl */ `
   varying float vAlpha;
   varying float vAccent;
+  uniform vec3 uBone;
+  uniform vec3 uSignal;
 
   void main() {
     vec2 uv = gl_PointCoord - vec2(0.5);
     float d = length(uv);
     if (d > 0.5) discard;
     float soft = pow((1.0 - smoothstep(0.0, 0.5, d)), 1.8);
-    vec3 bone = vec3(0.929, 0.918, 0.890);
-    vec3 signal = vec3(0.353, 0.820, 1.000);
-    gl_FragColor = vec4(mix(bone, signal, vAccent), soft * vAlpha);
+    gl_FragColor = vec4(mix(uBone, uSignal, vAccent), soft * vAlpha);
   }
 `;
 
@@ -308,6 +308,8 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
       blending: THREE.AdditiveBlending,
       uniforms: {
         uViewBasis: { value: new THREE.Matrix3() },
+        uBone: { value: new THREE.Color('#edeae3') },
+        uSignal: { value: new THREE.Color('#5ad1ff') },
         uBrainTarget: { value: v3(layout.brainCenter) }, uBrainScale: { value: 1 },
         uTriadTarget: { value: layout.triadCenters.map(v3) }, uTriadScale: { value: [1, 1, 1] },
         uStarTarget: { value: layout.starCenters.map(v3) }, uStarBase: { value: layout.starCenters.map(v3) }, uStarScale: { value: [1, 1, 1, 1] },
@@ -343,6 +345,17 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
     const points = new THREE.Points(geometry, material);
     points.frustumCulled = false;
     scene.add(points);
+
+    const applyTheme = (theme = document.documentElement.dataset.theme) => {
+      const light = theme === 'light';
+      material.uniforms.uBone.value.set(light ? '#242429' : '#edeae3');
+      material.uniforms.uSignal.value.set(light ? '#006f9c' : '#5ad1ff');
+      material.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending;
+      material.needsUpdate = true;
+    };
+    const onTheme = (event: Event) => applyTheme((event as CustomEvent<string>).detail);
+    applyTheme();
+    window.addEventListener('kal:theme', onTheme);
 
     let composer: EffectComposer | null = null;
     let bloomPass: UnrealBloomPass | null = null;
@@ -573,6 +586,7 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
       cancelAnimationFrame(frameId);
       clearTimeout(frameId);
       window.removeEventListener('kal:piano-ripple', onPianoRipple);
+      window.removeEventListener('kal:theme', onTheme);
       window.removeEventListener('pointermove', onPointerMove);
       document.removeEventListener('pointerleave', onPointerLeave);
       window.removeEventListener('resize', onResize);
@@ -590,11 +604,7 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
   return (
     <div data-testid="particle-field-container" className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
       <div
-        className={`absolute inset-0 transition-opacity duration-700 ${!webglSupported || reducedMotion ? 'opacity-100' : 'opacity-50'}`}
-        style={{
-          background:
-            'radial-gradient(ellipse at 70% 35%, rgba(90, 209, 255, 0.05) 0%, rgba(10, 10, 12, 0.96) 60%, #0A0A0C 100%)',
-        }}
+        className={`particle-fallback absolute inset-0 transition-opacity duration-700 ${!webglSupported || reducedMotion ? 'opacity-100' : 'opacity-50'}`}
       />
       <div ref={mountRef} className="w-full h-full" />
     </div>
