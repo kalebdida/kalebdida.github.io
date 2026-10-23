@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
-import { AtSign, Github, Mail, Radio, Send } from 'lucide-react';
+import { AtSign, Github, Instagram, Linkedin, Mail, Send } from 'lucide-react';
 
 export function RevealWords({ text }: { text: string }) {
   return <span className="reveal-words"><span className="sr-only">{text}</span>{text.split(/\s+/).map((word, i) => (
@@ -70,7 +70,8 @@ export function SocialIcon({ label }: { label: string }) {
   const props = { size: 19, strokeWidth: 1.5, 'aria-hidden': true as const };
   if (label === 'Email') return <Mail {...props} />;
   if (label === 'GitHub') return <Github {...props} />;
-  if (label === 'Telegram channel') return <Radio {...props} />;
+  if (label === 'LinkedIn') return <Linkedin {...props} />;
+  if (label === 'Instagram') return <Instagram {...props} />;
   if (label === 'Telegram') return <Send {...props} />;
   return <AtSign {...props} />;
 }

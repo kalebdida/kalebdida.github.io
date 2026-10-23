@@ -353,7 +353,10 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
       material.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending;
       material.needsUpdate = true;
     };
-    const onTheme = (event: Event) => applyTheme((event as CustomEvent<string>).detail);
+    const onTheme = (event: Event) => {
+      applyTheme((event as CustomEvent<string>).detail);
+      loadPortrait(sceneRef.current.portrait);
+    };
     applyTheme();
     window.addEventListener('kal:theme', onTheme);
 
@@ -370,28 +373,36 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
     const anchors = new AnchorTracker();
     let disposed = false;
     let portrait: HTMLImageElement | undefined;
-    if (sceneRef.current.portrait) {
-      portrait = new Image(); portrait.crossOrigin = 'anonymous';
-      portrait.onload = () => {
-        if (disposed || !portrait) return;
+    function loadPortrait(src?: string) {
+      if (!container || disposed) return;
+      if (portrait) { portrait.onload = null; portrait.onerror = null; }
+      material.uniforms.uPortrait.value = 0;
+      delete container.dataset.portrait;
+      delete container.dataset.portraitSrc;
+      if (!src) return;
+      const image = new Image(); image.crossOrigin = 'anonymous'; portrait = image;
+      image.onload = () => {
+        if (disposed || portrait !== image) return;
         try {
           const canvas = document.createElement('canvas');
-          canvas.width = 160; canvas.height = Math.max(1, Math.round(160 * portrait.naturalHeight / portrait.naturalWidth));
+          canvas.width = 160; canvas.height = Math.max(1, Math.round(160 * image.naturalHeight / image.naturalWidth));
           canvas.height = Math.min(240, canvas.height);
           const context = canvas.getContext('2d', { willReadFrequently: true });
           if (!context) return;
-          context.drawImage(portrait, 0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
           const sampled = samplePortrait(context.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height, count);
           if (!sampled) return;
           (geometry.getAttribute('aPortrait') as THREE.BufferAttribute).copyArray(sampled.positions).needsUpdate = true;
           (geometry.getAttribute('aPortraitBrightness') as THREE.BufferAttribute).copyArray(sampled.brightness).needsUpdate = true;
           material.uniforms.uPortrait.value = 1;
           container.dataset.portrait = 'sampled';
+          container.dataset.portraitSrc = src;
         } catch { container.dataset.portrait = 'brain-fallback'; }
       };
-      portrait.onerror = () => { container.dataset.portrait = 'brain-fallback'; };
-      portrait.src = sceneRef.current.portrait;
+      image.onerror = () => { container.dataset.portrait = 'brain-fallback'; };
+      image.src = src;
     }
+    loadPortrait(sceneRef.current.portrait);
 
     // when the layout flips between phone and desktop, rebuild the shapes
     const rebuild = () => {

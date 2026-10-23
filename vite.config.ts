@@ -6,9 +6,25 @@ import { defineConfig } from 'vite';
 import { parsePost } from './scripts/content.mjs';
 import { siteArtifacts, renderPage } from './scripts/site-content.mjs';
 import { preparePhotos } from './scripts/photos.mjs';
+import { createResumePdf } from './scripts/resume-pdf.mjs';
 
 export default defineConfig(() => ({
   plugins: [
+    {
+      name: 'downloadable-resume',
+      async generateBundle() {
+        this.emitFile({ type: 'asset', fileName: 'kaleb-dida-resume.pdf', source: await createResumePdf(import.meta.dirname) });
+      },
+      configureServer(server) {
+        server.middlewares.use(async (req, res, next) => {
+          if (req.url?.split('?')[0] !== '/kaleb-dida-resume.pdf') return next();
+          try {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.end(Buffer.from(await createResumePdf(import.meta.dirname)));
+          } catch (error) { next(error); }
+        });
+      },
+    },
     (() => {
       let prepared: Awaited<ReturnType<typeof preparePhotos>> | undefined;
       const id = '\0virtual:photos';

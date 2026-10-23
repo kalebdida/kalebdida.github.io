@@ -16,7 +16,7 @@ import { NowView, ResumeView } from './components/ExtraPages';
 import { Arrow, Motif, Rank, RevealWords, SocialIcon, spotlight } from './components/Details';
 import { useDialog } from './utils/useDialog';
 import { useReveals } from './utils/useReveals';
-import { Gallery } from './components/Gallery';
+import { ResumeDownload } from './components/ResumeDownload';
 import { Photo } from './components/Photo';
 import { Piano } from './components/Piano';
 import { Celebration } from './components/Celebration';
@@ -61,7 +61,6 @@ const CHAPTERS: { id: string; label: string; formation: number }[] = [
   { id: 'journey', label: 'Journey', formation: FORMATION.highlands },
   { id: 'recognition', label: 'Recognition', formation: FORMATION.dust },
   { id: 'field-notes', label: 'Field notes', formation: FORMATION.dust },
-  { id: 'moments', label: 'Moments', formation: FORMATION.dust },
   { id: 'off-screen', label: 'Off-screen', formation: FORMATION.sound },
   { id: 'contact', label: 'Say hi', formation: FORMATION.light },
 ].filter(chapter => chapter.id !== 'journey' || SITE_DATA.journey.some(item => item.showOnHome))
@@ -158,6 +157,7 @@ export default function App() {
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try { return localStorage.getItem('kal-theme') === 'light' ? 'light' : 'dark'; } catch { return 'dark'; }
   });
+  const portraitSrc = theme === 'dark' ? SITE_DATA.identity.portraitDark : SITE_DATA.identity.portraitLight;
   const [activeProject, setActiveProject] = useState<ProjectCaseFile | null>(null);
   const [copiedEmail, setCopiedEmail] = useState<'Copied' | 'Copy failed' | null>(null);
   const [marqueePaused, setMarqueePaused] = useState(false);
@@ -166,6 +166,7 @@ export default function App() {
   const [celebration, setCelebration] = useState(0);
   const celebrationId = useRef(0);
   const toastTimer = useRef<number | undefined>(undefined);
+  const siuuuAudioRef = useRef<HTMLAudioElement>(null);
   const [preview, setPreview] = useState<ProjectCaseFile | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [siuuuToast, setSiuuuToast] = useState(false);
@@ -201,8 +202,9 @@ export default function App() {
     journeyDrift: 0,
     hl3: -1,
     hl4: -1,
-    portrait: SITE_DATA.about.photo,
+    portrait: portraitSrc,
   });
+  sceneRef.current.portrait = portraitSrc;
 
   useEffect(() => {
     if (!showLoader) return;
@@ -224,11 +226,10 @@ export default function App() {
 
   const celebrate = (withVoice = false) => {
     setCelebration(++celebrationId.current); setSiuuuToast(true);
-    if (withVoice && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const call = new SpeechSynthesisUtterance('Siuuuuuuu!');
-      call.rate = .72; call.pitch = 1.05; call.volume = 1;
-      window.speechSynthesis.speak(call);
+    if (withVoice && siuuuAudioRef.current) {
+      const recording = siuuuAudioRef.current;
+      recording.pause(); recording.currentTime = 0;
+      void recording.play().catch(() => {});
     }
     clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => setSiuuuToast(false), 2000);
@@ -381,7 +382,7 @@ export default function App() {
         else if (activeProject) setActiveProject(null);
         return;
       }
-      if (activeProject || flagFound || document.querySelector('[data-gallery-dialog]') || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (activeProject || flagFound || e.metaKey || e.ctrlKey || e.altKey) return;
 
       const { nextBuffer, triggered } = updateKeystrokeBuffer(keystrokeBufRef.current, e.key);
       keystrokeBufRef.current = nextBuffer;
@@ -566,7 +567,7 @@ export default function App() {
             <section id="hero" data-formation={FORMATION.mind} className="hero-section min-h-[100svh] flex flex-col pt-28 pb-16 sm:pb-20">
               <div className="hero-portrait-wrap intro-fade" style={delay(850)} aria-hidden="true">
                 <span className="hero-portrait-frame" />
-                <Photo src={SITE_DATA.identity.heroPhoto} alt="" eager sizes="(min-width: 1024px) 520px, 45vw" className="hero-portrait" />
+                <Photo src={portraitSrc} alt="" eager sizes="(min-width: 1024px) 520px, 45vw" className="hero-portrait" />
               </div>
               <div className="flex items-baseline justify-between gap-6 t-meta text-ash intro-fade" style={delay(1500)}>
                 <span>{SITE_DATA.identity.city}</span>
@@ -581,7 +582,7 @@ export default function App() {
                   <span className="t-display text-bone">
                     <Letters text={SITE_DATA.identity.shortName} trigger="load" delay={420} />
                   </span>
-                  <span lang="am" className="t-geez text-ash text-[1.25rem] sm:text-[1.5rem] tracking-wide intro-fade" style={delay(1150)}>
+                  <span lang="am" className="basis-full t-geez text-ash text-[1.25rem] sm:text-[1.5rem] tracking-wide intro-fade" style={delay(1150)}>
                     {SITE_DATA.identity.geezName}
                   </span>
                 </h1>
@@ -602,9 +603,7 @@ export default function App() {
                   <button type="button" data-magnetic onClick={() => navigateTo('/blog')} className="link-quiet">
                     Read field notes
                   </button>
-                  <button type="button" onClick={() => navigateTo('/resume')} className="link-quiet">
-                    Full resume
-                  </button>
+                  <ResumeDownload className="link-quiet" />
                 </div>
               </div>
 
@@ -614,7 +613,7 @@ export default function App() {
             </section>
 
             {/* about */}
-            <Section id="about" title="About" visual={<div className="about-visual mt-8">{SITE_DATA.about.photo && <Photo src={SITE_DATA.about.photo} alt={SITE_DATA.identity.name} sizes="(min-width: 1024px) 320px, 80vw" className="about-portrait" />}<div data-particle-anchor="brain" className="brain-slot" aria-hidden="true" /></div>}>
+            <Section id="about" title="About" visual={<div className="about-visual mt-8">{portraitSrc && <Photo src={portraitSrc} alt={SITE_DATA.identity.name} sizes="(min-width: 1024px) 320px, 80vw" className="about-portrait" />}<div data-particle-anchor="brain" className="brain-slot" aria-hidden="true" /></div>}>
               <p data-reveal="words" className="about-pullquote t-lead text-bone max-w-[34ch]">
                 <RevealWords text={SITE_DATA.about.lead} />
               </p>
@@ -692,7 +691,7 @@ export default function App() {
             </Section>
 
             {/* journey */}
-            {SITE_DATA.journey.some(item => item.showOnHome) && <Section id="journey" title="Journey" aside={<button type="button" data-magnetic className="t-ui link" onClick={() => navigateTo('/resume')}>Full resume <Arrow className="inline-block ml-2 align-middle" /></button>}>
+            {SITE_DATA.journey.some(item => item.showOnHome) && <Section id="journey" title="Journey" aside={<ResumeDownload>Full resume <Arrow className="inline-block ml-2 align-middle" /></ResumeDownload>}>
               <ol ref={journeyListRef} className="journey-list relative pl-8">
                 <span aria-hidden="true" className="journey-rail" />
                 {SITE_DATA.journey.filter(item => item.showOnHome).map((m, i) => (
@@ -754,8 +753,6 @@ export default function App() {
               </ul>
             </Section>
 
-            <Section id="moments" title="Moments"><Gallery /></Section>
-
             {/* off-screen */}
             <Section id="off-screen" title="Off-screen">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-10">
@@ -764,6 +761,7 @@ export default function App() {
                     {item.id === 'football' ? <button type="button" className="football-trigger" data-cursor="Play" onClick={() => celebrate(true)} aria-label="Play Siuu celebration"><Motif kind="football" /></button> : <Motif kind={item.id} />}
                     <h3 className="t-h3 text-bone">{item.label}</h3>
                     <p className="t-body text-ash mt-2">{item.text}</p>
+                    {item.href && <a href={item.href} target="_blank" rel="noopener noreferrer" className="t-meta link inline-flex items-center gap-2 mt-4"><SocialIcon label="Telegram" />{item.linkLabel}<Arrow /></a>}
                     {item.id === 'music' && <Piano soundOn={soundOn} onEnable={() => handleToggleSound(true)} />}
                     {item.id === 'football' && <p className="t-meta text-ash mt-4">Try typing <kbd className="typing-hint">siuuu</kbd>, or tap the football.</p>}
                   </div>
@@ -805,9 +803,7 @@ export default function App() {
                   <button type="button" onClick={() => navigateTo('/now')} className="link-quiet">
                     Now
                   </button>
-                  <button type="button" onClick={() => navigateTo('/resume')} className="link-quiet">
-                    Resume
-                  </button>
+                  <ResumeDownload className="link-quiet" />
                 </span>
               </footer>
             </section>
@@ -828,6 +824,7 @@ export default function App() {
       )}
 
       <WorkPreview ref={previewRef} project={preview} />
+      <audio ref={siuuuAudioRef} src="/audio/ronaldo-siuuu.mp3" preload="none" />
       {!!celebration && <Celebration key={celebration} onDone={() => setCelebration(0)} />}
       {copiedEmail && <div className="copy-toast t-ui" role="status">{copiedEmail}</div>}
 

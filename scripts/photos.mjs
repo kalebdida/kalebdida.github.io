@@ -6,8 +6,8 @@ import sharp from 'sharp';
 /** Build-only image processing: original uploads remain untouched. */
 export async function preparePhotos(root) {
   const readJson = async name => JSON.parse(await readFile(resolve(root, 'content', `${name}.json`), 'utf8'));
-  const [site, projects, gallery] = await Promise.all(['site', 'projects', 'gallery'].map(readJson));
-  const refs = [...new Set([site.identity.heroPhoto, site.about.photo, ...projects.map(p => p.photo), ...gallery.map(p => p.image)].filter(Boolean))];
+  const [site, projects] = await Promise.all(['site', 'projects'].map(readJson));
+  const refs = [...new Set([site.identity.portraitDark, site.identity.portraitLight, ...projects.map(p => p.photo)].filter(Boolean))];
   const manifest = {}, assets = new Map();
   const uploads = resolve(root, 'public/uploads');
   // Bound native work: two photos at a time, three responsive variants at most.

@@ -1,5 +1,6 @@
 import { SITE_DATA } from '../data/siteData';
 import { Arrow, RevealWords } from './Details';
+import { ResumeDownload } from './ResumeDownload';
 
 interface ExtraPageProps { onNavigateHome: () => void; }
 
@@ -26,7 +27,7 @@ export function ResumeView({ onNavigateHome }: ExtraPageProps) {
   return <div className="max-w-6xl mx-auto px-6 pt-32 pb-28 print:pt-0 print:pb-0">
     <div className="flex flex-wrap gap-4 items-center justify-between print:hidden">
       <button type="button" onClick={onNavigateHome} className="t-meta link-quiet">Kal</button>
-      <button type="button" onClick={() => window.print()} className="pdf-button t-ui">Save as PDF <Arrow className="inline-block ml-2 align-middle" /></button>
+      <ResumeDownload className="pdf-button t-ui">Download PDF <Arrow className="inline-block ml-2 align-middle" /></ResumeDownload>
     </div>
     <div className="resume-layout">
       <aside className="resume-sidebar"><div className="resume-sidebar-inner" data-lenis-prevent role="region" aria-label="Profile, contact, skills and languages" tabIndex={0}>

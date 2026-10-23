@@ -11,7 +11,8 @@
     "title": "Aspiring cognitive scientist. Human-centered AI and software.",
     "tagline": "Minds, machines, and the locks between them.",
     "intro": "I'm Kal, an aspiring cognitive scientist currently based in Addis Ababa. I build human-centered software, play CTFs, and want to become an AI engineer.",
-    "heroPhoto": "/uploads/kaleb-dida-portrait-formal.png"
+    "portraitDark": "/uploads/kaleb-dida-portrait-formal.png",
+    "portraitLight": "/uploads/kaleb-dida-portrait-smiling.png"
   },
   "about": {
     "lead": "How minds work, how machines think, and how to keep those machines safe.",
@@ -38,8 +39,7 @@
         "value": "Amharic, English, Afaan Oromoo"
       }
     ],
-    "homeParagraph": "I’m spending my gap year building Logbook, competing in CTFs and teaching Bible lessons in my neighborhood.",
-    "photo": "/uploads/kaleb-dida-portrait-smiling.png"
+    "homeParagraph": "I’m spending my gap year building Logbook, competing in CTFs and teaching Bible lessons in my neighborhood."
   },
   "disciplines": [
     {
@@ -72,7 +72,9 @@
     {
       "id": "writing",
       "label": "Writing",
-      "text": "Journals on my Telegram channel."
+      "text": "Journals on my Telegram channel.",
+      "href": "https://t.me/kaleblog",
+      "linkLabel": "Read @kaleblog"
     },
     {
       "id": "teaching",
@@ -119,14 +121,14 @@
       "href": "https://t.me/CalebDida"
     },
     {
-      "label": "Telegram channel",
-      "handle": "@kaleblog",
-      "href": "https://t.me/kaleblog"
+      "label": "LinkedIn",
+      "handle": "@kalebdida",
+      "href": "https://www.linkedin.com/in/kalebdida/"
     },
     {
-      "label": "Other platforms",
+      "label": "Instagram",
       "handle": "@kalebdida",
-      "href": ""
+      "href": "https://www.instagram.com/kalebdida/"
     }
   ],
   "keywords": [

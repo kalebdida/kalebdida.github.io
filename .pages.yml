@@ -92,39 +92,6 @@ content:
           this can stay empty.
     description: Write a note here, or add a link to a piece on Medium or Substack.
       Save on the source branch.
-  - name: gallery
-    label: "Photos: Moments gallery"
-    description: Upload your photographs here. There are no stock or sample photos
-      on the site.
-    type: file
-    path: content/gallery.json
-    format: json
-    list: true
-    fields:
-      - name: image
-        label: Upload a photograph
-        type: image
-        required: true
-        description: Choose an image from Media or upload a new one. Files live in
-          public/uploads.
-      - name: caption
-        label: Caption
-        type: text
-        description: Describe the photograph. Also used as its accessible description.
-      - name: date
-        label: Date
-        type: date
-        options:
-          format: yyyy-MM-dd
-        description: When was the photo taken? Leave blank if you do not know.
-      - name: location
-        label: Location
-        type: string
-        description: Optional. Add the place only if you want it public.
-      - name: tag
-        label: Tag
-        type: string
-        description: Optional. A short topic for this photograph.
   - name: site
     label: Site
     type: file
@@ -168,10 +135,14 @@ content:
           - name: intro
             label: Intro
             type: text
-          - name: heroPhoto
-            label: Hero portrait
+          - name: portraitDark
+            label: Dark-theme portrait
             type: image
-            description: Optional transparent portrait shown on the home-page opening.
+            description: The black-and-white transparent portrait, used in dark mode.
+          - name: portraitLight
+            label: Light-theme portrait
+            type: image
+            description: The color transparent portrait, used in light mode.
       - name: about
         label: About
         type: object
@@ -200,11 +171,6 @@ content:
             label: About paragraph on home
             type: text
             description: Write one short paragraph. This is the paragraph visitors see.
-          - name: photo
-            label: Portrait
-            type: image
-            description: Optional. Upload a portrait. The site also turns it into particles;
-              the brain remains when no photo is uploaded.
       - name: disciplines
         label: Disciplines
         type: object
@@ -236,6 +202,14 @@ content:
           - name: text
             label: Text
             type: text
+          - name: href
+            label: Link
+            type: string
+            description: Optional full HTTPS address, such as the Telegram writing channel.
+          - name: linkLabel
+            label: Link text
+            type: string
+            description: Short text describing where the link opens.
         list: true
       - name: now
         label: Now

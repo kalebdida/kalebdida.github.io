@@ -25,23 +25,20 @@ Always check that the branch selector says **source** before saving. `main` is g
 4. Choose **Medium** or **Substack** in **External platform**. The body can stay empty.
 5. Set Status to published, turn Draft off, and save. The card opens the original article. No local article page is created.
 
-## Add photographs
-
-1. Open **Photos: Moments gallery**.
-2. Add an item and choose **Upload a photograph**.
-3. Upload your image or choose one from Media. Add a caption describing what is in the photograph.
-4. Add a date, location or tag only if you know them and want them public. Leave unknown details blank.
-5. Save. The photograph appears in Moments. Click or tap it to open the lightbox; use arrow keys, Previous/Next, or swipe to browse. Escape closes it.
-
-There are no sample or stock photos in the gallery. Until you upload your own, the home page shows an empty gallery state.
-
-Uploads live in **public/uploads/** in GitHub and are served at **/uploads/**. Use the CMS upload buttons; you do not need to write paths or change code. The build creates smaller WebP versions for phones and larger screens, without changing the uploaded original.
-
 ## Add a portrait or project photo
 
-- **Site → Identity → Hero portrait:** upload the transparent portrait shown in the opening section.
-- **Site → About → Portrait:** upload the portrait shown in About. It is also sampled into the particle portrait. With no portrait, the brain formation remains. Uploads from this site work without additional services; external images that prevent canvas access keep the brain fallback.
+- **Site → Identity → Dark-theme portrait:** the black-and-white cutout used in dark mode.
+- **Site → Identity → Light-theme portrait:** the color cutout used in light mode.
+- These portraits switch with the visitor’s theme in the opening and About sections, including the particle portrait.
 - **Projects → an item → Project photo:** upload a real project image. It appears in the hover preview and inside the case file. With no image, the preview uses a generated graphic.
+
+Uploads live in **public/uploads/** and are served at **/uploads/**. The upload buttons handle the paths. The build creates smaller WebP versions without changing the uploaded original.
+
+## Edit links and the resume
+
+- **Site → Off Screen → Writing:** edit Link and Link text for the Telegram channel.
+- **Site → Socials:** edit contact links, including personal Telegram, LinkedIn and Instagram.
+- **Resume** and **Recognition:** edit the resume content. Each build generates the downloadable **kaleb-dida-resume.pdf** from these fields and the Site identity. Full resume links download this file. The online version remains at **/resume**.
 
 ## Choose what shows on home
 
@@ -57,7 +54,7 @@ For projects, **Short home-page summary** controls the one-line introduction. Th
 1. Open **Site → About**.
 2. Edit **Lead**, the strong opening sentence.
 3. Edit **About paragraph on home**, the short paragraph below it.
-4. Edit the fact cards under **Facts**, or upload a Portrait.
+4. Edit the fact cards under **Facts**. Portraits are under **Site → Identity**.
 5. Save. Keep it short and use only verified facts.
 
 Use sentence case and correct proper nouns. Avoid em dashes. Leave unknown dates, achievements, counts and links out. Keep existing project IDs and published post filenames stable.
