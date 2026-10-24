@@ -32,10 +32,10 @@ content:
       - name: date
         label: Date
         type: date
-        required: true
         options:
           format: yyyy-MM-dd
-        description: Choose the publication date. Use the actual date, not a guessed one.
+        description: Use the actual publication date. Required for local posts. Leave
+          blank for an external article when its original date is unknown.
       - name: summary
         label: Summary
         type: text
@@ -251,6 +251,18 @@ content:
         type: string
         list: true
         description: Short topics shown between About and What I do.
+      - name: contact
+        label: Private message delivery
+        type: object
+        fields:
+          - name: relayUrl
+            label: Relay URL
+            type: string
+            pattern:
+              regex: ^$|^https://[^\s]+$
+              message: Use the public HTTPS relay URL. Never enter a bot token.
+            description: Public HTTPS address of the deployed contact relay. Never put
+              a bot token or chat ID here. Leave blank until the relay is ready.
   - name: projects
     label: Projects
     type: file

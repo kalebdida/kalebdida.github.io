@@ -7,12 +7,12 @@ export async function deliverAnonymousNote(endpoint: string, message: string, ho
   const response = await request(endpoint, {
     method: 'POST', signal,
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ message: note, _subject: 'Anonymous note from Kal’s portfolio', _template: 'table', _honey: honey, _captcha: 'false' }),
+    body: JSON.stringify({ message: note, website: honey }),
     credentials: 'omit',
   });
   if (!response.ok) throw new Error('Delivery was not confirmed');
   const result: unknown = await response.json();
-  if (!result || typeof result !== 'object' || !('success' in result) || (result.success !== true && result.success !== 'true')) {
+  if (!result || typeof result !== 'object' || !('ok' in result) || result.ok !== true) {
     throw new Error('Delivery was not confirmed');
   }
 }

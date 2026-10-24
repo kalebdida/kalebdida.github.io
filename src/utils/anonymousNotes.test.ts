@@ -10,12 +10,13 @@ test('anonymous delivery sends only the note and reports success only on confirm
     assert.equal(payload.message, 'Hello Kal');
     assert.equal('email' in payload, false);
     assert.equal('name' in payload, false);
-    return new Response(JSON.stringify({ success: 'true' }));
+    assert.equal('chat_id' in payload, false);
+    return new Response(JSON.stringify({ ok: true }));
   }) as typeof fetch;
   await deliverAnonymousNote(endpoint, '  Hello Kal  ', '', signal, request);
 });
-test('provider rejection, activation pending, malformed replies and outages never look like delivery', async () => {
-  for (const response of [new Response('{}'), new Response('{"success":"false","message":"Activate your form"}'), new Response('Unavailable', { status: 503 }), new Response('Not JSON')]) {
+test('relay rejection, malformed replies and outages never look like delivery', async () => {
+  for (const response of [new Response('{}'), new Response('{"ok":false}'), new Response('Unavailable', { status: 503 }), new Response('Not JSON')]) {
     await assert.rejects(deliverAnonymousNote(endpoint, 'Hello', '', signal, (async () => response) as typeof fetch));
   }
 });

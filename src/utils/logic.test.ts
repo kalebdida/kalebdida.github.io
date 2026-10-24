@@ -129,6 +129,26 @@ test('static routes and feeds exclude drafts and external post routes', async ()
   const html = renderPage('<title>Old</title><meta name="description" content="Old"/><link rel="canonical" href="old"/>', data.routes[0], data);
   assert.ok(html.includes(`${data.identity.shortName} (${data.identity.handle})`));
   assert.ok(html.includes('href="https://kalebdida.github.io/"'));
+  assert.equal(data.rss.includes('Invalid Date'), false);
+});
+
+test('external writing can omit unknown dates without inventing a publication year', () => {
+  const raw = `---
+title: Earlier writing
+date: ""
+summary: An existing article.
+tags: [Robotics]
+draft: false
+status: published
+external_url: https://medium.com/example
+external_platform: medium
+---`;
+  const post = parsePost('earlier-writing', raw);
+  assert.equal(post.date, '');
+  assert.equal(post.year, 'On Medium');
+  assert.equal(filterAndGroupPosts([post], '', null)[0].year, 'On Medium');
+  assert.throws(() => parsePost('earlier-writing', raw.replace('date: ""', 'date: 0')), /date/);
+  assert.throws(() => parsePost('earlier-writing', raw.replace('external_url: https://medium.com/example', 'external_url: ""')), /date/);
 });
 
 

@@ -1,14 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Eye } from 'lucide-react';
 
-// A real shared counter; no locally generated or invented visitor numbers.
-const BADGE = 'https://hits.dwyl.com/kalebdida/portfolio-site-20261024.svg?style=flat-square';
-
-export function VisitorCount({ siteUrl }: { siteUrl: string }) {
+export function VisitorCount({ relayUrl, siteUrl }: { relayUrl: string; siteUrl: string }) {
+  const [count, setCount] = useState<number | null>(null);
   const [failed, setFailed] = useState(false);
-  // Local previews must not inflate the public counter.
-  if (window.location.hostname !== new URL(siteUrl).hostname) return null;
-  return <span className="visitor-count" title="Page views counted from October 24, 2026. This is not a unique-person count.">
-    <span>Page visits</span>
-    {failed ? <span className="t-meta">Count unavailable</span> : <a href={BADGE} target="_blank" rel="noopener noreferrer" aria-label="Open live page-visit count"><img src={BADGE} alt="Live site visit count" width="88" height="24" referrerPolicy="no-referrer" onError={() => setFailed(true)} /></a>}
-  </span>;
+  useEffect(() => {
+    if (!relayUrl || window.location.hostname !== new URL(siteUrl).hostname) return;
+    let mounted = true;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
+    fetch(`${relayUrl.replace(/\/$/, '')}/visits`, { signal: controller.signal, credentials: 'omit' })
+      .then(async response => {
+        if (!response.ok) throw new Error('Counter unavailable');
+        const data = await response.json();
+        if (!Number.isSafeInteger(data.count) || data.count < 0) throw new Error('Invalid count');
+        if (mounted) setCount(data.count);
+      }).catch(() => { if (mounted) setFailed(true); })
+      .finally(() => clearTimeout(timeout));
+    return () => { mounted = false; controller.abort(); clearTimeout(timeout); };
+  }, [relayUrl, siteUrl]);
+  if (!relayUrl || window.location.hostname !== new URL(siteUrl).hostname) return null;
+  return <div className="contact-card visitor-count-card" data-reveal="up" title="Page views, not unique people. Counting started October 24, 2026.">
+    <dt className="t-meta text-ash flex items-center gap-2"><Eye size={19} strokeWidth={1.5} aria-hidden="true" />Page visits</dt>
+    <dd className={`mt-2 ${count === null ? 't-ui text-ash' : 't-h3 text-bone'}`} aria-live="polite">{count === null ? failed ? 'Temporarily unavailable' : 'Loading…' : count.toLocaleString()}</dd>
+  </div>;
 }

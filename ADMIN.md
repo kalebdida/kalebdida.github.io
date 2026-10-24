@@ -8,7 +8,8 @@ Always check that the branch selector says **source** before saving. `main` is g
 
 1. Open **Posts: write or link**, the first item in the sidebar.
 2. Choose **New**. Give the note a title and a stable filename with lowercase words separated by hyphens. The filename becomes its web address.
-3. Set the actual publication date, write a short summary, and add a few tags.
+3. Set the actual publication date, write a short summary, and add a few tags. For
+   an external link, leave the date blank if the original date is unknown.
 4. Leave **External URL** and **External platform** empty.
 5. Scroll to **Write your post**. Write the full piece there. Use **Heading 2** for section headings; these become the contents links. You can add paragraphs, lists, links, images and code blocks.
 6. Add a thumbnail if you have one. Without a thumbnail, the site makes a patterned cover from the title.
@@ -61,32 +62,26 @@ Use sentence case and correct proper nouns. Avoid em dashes. Leave unknown dates
 
 ## Anonymous notes and visits
 
-The note form is inside **Say hi**, below the contact cards. It uses FormSubmit
-to deliver private notes to the email in **Site → Identity → Email**. Visitors
-do not enter a name or email address, and messages are not published on the site.
+The form stays inside **Say hi**, below the contact cards. Notes go through a
+private relay into the owner's existing Telegram bot. Email delivery and the
+external FormSubmit form have been removed. The website does not expose the bot,
+its token or its destination chat ID. Visitors provide only their note.
 
-**One-time activation:** send a note using the live form. If delivery is not yet
-confirmed, choose **Try direct delivery in a new tab**. This opens FormSubmit’s
-normal submission and activation flow. Open its activation email in the destination
-inbox and click **Activate Form**. Check Spam if it does not arrive. Send a second
-note after activation to confirm receipt. The site
-shows success only when the provider confirms delivery; it keeps the text if
-delivery fails or cannot be confirmed. Changing the destination email requires
-activating the new address too.
+Deploy the relay once using [workers/contact/README.md](workers/contact/README.md),
+then paste its public HTTPS URL into **Site → Private message delivery → Relay URL**.
+Bot tokens and chat IDs belong only in the Worker's secret fields. **Never put
+secrets into this CMS field.** Without a relay URL, sending is disabled and the
+counter is hidden. Send a test note after setup and confirm receipt in Telegram.
 
-FormSubmit supplies delivery and spam filtering; the form also includes a
-honeypot. Notes are sent through a third-party service, whose privacy policy is
-linked below the form. There is no website database or browser-readable secret.
+The page-visit count appears as a regular contact card, with the current theme's
+colors and typography. It is not clickable. The relay gets the existing
+`kalebdida/portfolio-site-20261024` total from dwyl Hits and returns a number. This
+is a page-view count, not a unique-person count. Local previews are excluded;
+network errors never become invented numbers.
 
-The footer badge uses **dwyl Hits** with the separate counter
-`kalebdida/portfolio-site-20261024`. It counts page views from this addition, not
-historical visitors or unique people. It loads on the home page, and local previews
-are excluded. Refreshes may add views. It never displays
-an invented number; a failed badge request shows **Count unavailable**. The badge
-service may receive normal request data such as IP address and browser user agent.
-
-**Send a spark** triggers a brief ripple in the existing contact particles. It is
-hidden for visitors who prefer reduced motion.
+The small orb beside the form is a local Three.js scene. **Tap to scatter** makes
+its particles spread and settle in place. It pauses off-screen and is omitted
+when a visitor prefers reduced motion.
 
 ## Development commands
 
@@ -95,6 +90,7 @@ npm ci
 npx tsc --noEmit
 npx tsx --test src/utils/logic.test.ts
 npx tsx --test src/utils/anonymousNotes.test.ts
+node --test workers/contact/worker.test.mjs
 npm run build
 npm run dev
 ```

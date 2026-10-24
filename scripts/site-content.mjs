@@ -19,7 +19,8 @@ export function siteArtifacts(root) {
   ];
   const items = posts.map(p => {
     const url = p.external?.url ?? `${identity.url}/blog/${p.slug}`;
-    return `<item><title>${escapeHtml(p.title)}</title><link>${escapeHtml(url)}</link><guid isPermaLink="true">${escapeHtml(url)}</guid><pubDate>${new Date(`${p.date}T00:00:00Z`).toUTCString()}</pubDate><description>${escapeHtml(p.summary)}</description></item>`;
+    const published = p.date ? `<pubDate>${new Date(`${p.date}T00:00:00Z`).toUTCString()}</pubDate>` : '';
+    return `<item><title>${escapeHtml(p.title)}</title><link>${escapeHtml(url)}</link><guid isPermaLink="true">${escapeHtml(url)}</guid>${published}<description>${escapeHtml(p.summary)}</description></item>`;
   }).join('\n');
   const rss = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Field notes, ${escapeHtml(identity.shortName)}</title><description>Writing on building things, minds, and what ${escapeHtml(identity.handle)} learns along the way.</description><link>${escapeHtml(identity.url)}/blog</link><atom:link href="${escapeHtml(identity.url)}/rss.xml" rel="self" type="application/rss+xml"/><language>en-us</language>${items}</channel></rss>\n`;
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${routes.map(r => `<url><loc>${escapeHtml(identity.url)}/${r.path}</loc></url>`).join('')}</urlset>\n`;

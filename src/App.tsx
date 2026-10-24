@@ -792,14 +792,14 @@ export default function App() {
                       </dd>
                     </div>
                   ))}
+                  <VisitorCount relayUrl={SITE_DATA.contact.relayUrl} siteUrl={SITE_DATA.identity.url} />
                 </dl>
-                <AnonymousNote email={SITE_DATA.identity.email} reducedMotion={reducedMotion} />
+                <AnonymousNote relayUrl={SITE_DATA.contact.relayUrl} reducedMotion={reducedMotion} theme={theme} />
               </div>
 
               <footer className="relative mt-24 pt-6 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 t-meta text-ash">
                 <div className="absolute top-0 left-0 right-0 h-px bg-hair" />
                 <span className="footer-byline">
-                  <VisitorCount siteUrl={SITE_DATA.identity.url} />
                   <span>
                     © {new Date().getFullYear()} {SITE_DATA.identity.name}
                     <span className="t-geez ml-2">{SITE_DATA.identity.geezName}</span>

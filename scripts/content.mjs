@@ -11,10 +11,11 @@ export function parsePost(slug, raw) {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)([\s\S]*)$/);
   if (!match) throw new Error(`${slug}: Markdown needs YAML frontmatter`);
   const data = parse(match[1], { maxAliasCount: 20 });
-  for (const field of ['title', 'date', 'summary']) {
+  for (const field of ['title', 'summary']) {
     if (typeof data?.[field] !== 'string' || !data[field].trim()) throw new Error(`${slug}: missing ${field}`);
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date) || Number.isNaN(Date.parse(data.date)) || new Date(data.date).toISOString().slice(0, 10) !== data.date) throw new Error(`${slug}: use a valid YYYY-MM-DD date`);
+  const date = data.date ?? '';
+  if (typeof date !== 'string' || (!date && !data.external_url) || (date && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date))) throw new Error(`${slug}: use a valid YYYY-MM-DD date`);
   if (!['outline', 'published'].includes(data.status)) throw new Error(`${slug}: invalid status`);
   if (typeof data.draft !== 'boolean') throw new Error(`${slug}: draft must be a boolean`);
   if (!Array.isArray(data.tags) || data.tags.some(tag => typeof tag !== 'string')) throw new Error(`${slug}: tags must be a list of strings`);
@@ -31,7 +32,7 @@ export function parsePost(slug, raw) {
     return { id: count ? `${base}-${count + 1}` : base, heading, outlinePoints: [] };
   });
   return {
-    slug, title: data.title, date: data.date, year: data.date.slice(0, 4), summary: data.summary,
+    slug, title: data.title, date, year: date ? date.slice(0, 4) : data.external_platform === 'substack' ? 'On Substack' : 'On Medium', summary: data.summary,
     tags: data.tags, draft: data.draft, status: data.status, thumbnail: data.thumbnail || undefined,
     external: data.external_url ? { url: data.external_url, platform: data.external_platform } : undefined,
     body, sections, readingTimeMin: Math.max(1, Math.ceil(body.split(/\s+/).length / 200)),

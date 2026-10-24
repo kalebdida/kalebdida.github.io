@@ -1,0 +1,23 @@
+name = "kal-portfolio-contact"
+main = "worker.mjs"
+compatibility_date = "2026-10-24"
+workers_dev = true
+
+[observability]
+enabled = false
+
+[vars]
+SITE_ORIGIN = "https://kalebdida.github.io"
+
+[[ratelimits]]
+name = "NOTES_LIMITER"
+namespace_id = "202610241"
+simple = { limit = 3, period = 60 }
+
+[[ratelimits]]
+name = "VISITS_LIMITER"
+namespace_id = "202610242"
+simple = { limit = 60, period = 60 }
+
+# TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be Worker secrets.
+# Never put their values here, in Pages CMS, or in VITE_ environment variables.

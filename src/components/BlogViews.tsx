@@ -89,7 +89,7 @@ export function BlogIndexView({ onSelectPost, onNavigateHome }: BlogIndexProps) 
       ) : (
         <div className="mt-6">
           {grouped.map((group) => (
-            <section key={group.year} aria-label={`Posts from ${group.year}`} className="mt-8">
+            <section key={group.year} aria-label={group.year.startsWith('On ') ? `Published ${group.year}` : `Posts from ${group.year}`} className="mt-8">
               <h2 className="t-meta text-ash">{group.year}</h2>
               <ul className="mt-2">
                 {group.posts.map((post) => (
