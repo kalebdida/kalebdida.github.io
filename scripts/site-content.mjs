@@ -13,6 +13,7 @@ export function siteArtifacts(root) {
   const routes = [
     { path: '', title: `${identity.shortName} (${identity.handle})`, description: identity.intro },
     { path: 'blog', title: `Field notes, ${identity.shortName}`, description: 'Writing on building things, minds, and what I learn along the way.' },
+    { path: 'projects', title: `Projects, ${identity.shortName}`, description: 'Apps, experiments, and research, with case files, live previews and source code.' },
     { path: 'now', title: `Now, ${identity.shortName}`, description: identity.title },
     { path: 'resume', title: `Resume, ${identity.shortName}`, description: resume.title },
     ...posts.filter(p => !p.external).map(p => ({ path: `blog/${p.slug}`, title: `${p.title}, ${identity.shortName}`, description: p.summary })),

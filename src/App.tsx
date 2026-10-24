@@ -32,11 +32,13 @@ import { FORMATION } from './three/formations';
 const ParticleField = lazy(() => import('./components/ParticleField').then(m => ({ default: m.ParticleField })));
 const BlogIndexView = lazy(() => import('./components/BlogViews').then(m => ({ default: m.BlogIndexView })));
 const BlogPostView = lazy(() => import('./components/BlogViews').then(m => ({ default: m.BlogPostView })));
+const ProjectsView = lazy(() => import('./components/ProjectsView'));
 
 type RouteState =
   | { page: 'notfound' }
   | { page: 'home' }
   | { page: 'blog' }
+  | { page: 'projects' }
   | { page: 'post'; slug: string }
   | { page: 'now' }
   | { page: 'resume' };
@@ -45,6 +47,7 @@ function parseLocationToRoute(pathname: string, hash: string): RouteState {
   const cleanHash = hash.replace(/^#/, '');
   const path = cleanHash.startsWith('/') ? cleanHash : pathname;
   if (path === '/blog' || path === '/blog/') return { page: 'blog' };
+  if (path === '/projects' || path === '/projects/') return { page: 'projects' };
   if (path.startsWith('/blog/')) {
     const slug = path.replace('/blog/', '').replace(/\/$/, '');
     return SITE_DATA.posts.some(post => post.slug === slug && !post.draft && !post.external) ? { page: 'post', slug } : { page: 'notfound' };
@@ -273,6 +276,7 @@ export default function App() {
   useEffect(() => {
     const base = SITE_DATA.identity.shortName;
     if (route.page === 'home') document.title = `${base} (Kal)`;
+    else if (route.page === 'projects') document.title = `Projects, ${base}`;
     else if (route.page === 'blog') document.title = `Field notes, ${base}`;
     else if (route.page === 'post') {
       const found = SITE_DATA.posts.find((p) => p.slug === route.slug && !p.draft && !p.external);
@@ -453,7 +457,7 @@ export default function App() {
 
   const navItems = [
     { label: 'About', onClick: () => scrollToSection('about'), active: false },
-    { label: 'Work', onClick: () => scrollToSection('work'), active: false },
+    { label: 'Work', onClick: () => route.page === 'home' ? scrollToSection('work') : navigateTo('/projects'), active: route.page === 'projects' },
     { label: 'Journey', onClick: () => scrollToSection('journey'), active: false },
     { label: 'Field notes', onClick: () => navigateTo('/blog'), active: route.page === 'blog' || route.page === 'post' },
     { label: 'Now', onClick: () => navigateTo('/now'), active: route.page === 'now' },
@@ -543,8 +547,9 @@ export default function App() {
         <div ref={progressRef} aria-hidden="true" className="page-progress" />
       </header>
 
-      <main id="main-content" className="relative z-10"><Suspense fallback={<p className="t-ui max-w-3xl mx-auto px-6 pt-36">Loading field notes…</p>}>
+      <main id="main-content" className="relative z-10"><Suspense fallback={<p className="t-ui max-w-3xl mx-auto px-6 pt-36">Loading…</p>}>
         {route.page === 'notfound' && <NotFound onHome={() => navigateTo('/')} />}
+        {route.page === 'projects' && <ProjectsView onHome={() => navigateTo('/')} onOpen={setActiveProject} />}
         {route.page === 'blog' && (
           <BlogIndexView onSelectPost={(slug) => navigateTo(`/blog/${slug}`)} onNavigateHome={() => navigateTo('/')} />
         )}
@@ -659,7 +664,7 @@ export default function App() {
             </Section>
 
             {/* work */}
-            <Section id="work" title="Work" aside={<p className="t-ui text-ash max-w-[28ch]">Open any one to read its case file.</p>}>
+            <Section id="work" title="Work" aside={<><p className="t-ui text-ash max-w-[28ch]">Open any one to read its case file.</p><a href="/projects" className="t-ui link mt-5 inline-flex" onClick={event => { event.preventDefault(); navigateTo('/projects'); }}>Browse projects <Arrow className="inline-block ml-2" /></a></>}>
               <ul className="work-list">
                 {SITE_DATA.projects.map((project, i) => (
                   <li key={project.id} data-reveal="up" style={delay(i * 80)} className="relative">

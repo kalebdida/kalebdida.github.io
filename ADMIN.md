@@ -79,9 +79,16 @@ colors and typography. It is not clickable. The relay gets the existing
 is a page-view count, not a unique-person count. Local previews are excluded;
 network errors never become invented numbers.
 
-The small orb beside the form is a local Three.js scene. **Tap to scatter** makes
-its particles spread and settle in place. It pauses off-screen and is omitted
+The small **Keep it up** game beside the form starts only when Play is pressed.
+Move the paddle with a mouse, a finger or arrow keys. It pauses when scrolled
+off-screen, when focus leaves the board or when the tab is hidden. It is omitted
 when a visitor prefers reduced motion.
+
+The `/projects` page shows every case file with its available links. Edit
+**Projects → Live app URL** to enable an optional live homepage preview. The app
+loads only after the visitor presses **Preview homepage**. The **Links** list
+supplies the live-app and GitHub links. Upload a project image using **Project
+photo** for a static cover; without one, the page uses an abstract title cover.
 
 ## Development commands
 

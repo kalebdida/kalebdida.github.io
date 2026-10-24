@@ -19,6 +19,7 @@ export interface ProjectCaseFile {
   whatItIs: string;
   homeSummary?: string;
   photo?: string;
+  liveUrl?: string;
   built: string[];
   next?: string[];
   stack?: string[];

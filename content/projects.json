@@ -80,6 +80,11 @@
     "title": "Church Finder",
     "status": "Building",
     "kind": "Maps app",
+    "liveUrl": "https://church-finder-ghbi.onrender.com/",
+    "links": [
+      { "label": "Open live app", "href": "https://church-finder-ghbi.onrender.com/" },
+      { "label": "Source on GitHub", "href": "https://github.com/kalebdida/churchnearme" }
+    ],
     "summary": "Find the churches near you, starting with every church in Addis Ababa.",
     "whatItIs": "An app that shows nearby churches and every church in Addis Ababa. Addis first, then other cities.",
     "built": [

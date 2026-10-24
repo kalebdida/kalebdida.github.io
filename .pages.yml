@@ -334,6 +334,13 @@ content:
         label: Short home-page summary
         type: text
         description: One sentence. Detailed descriptions remain inside the case file.
+      - name: liveUrl
+        label: Live app URL
+        type: string
+        pattern:
+          regex: ^$|^https://[^\s]+$
+          message: Use the public HTTPS address of the app.
+        description: Public HTTPS app address. Enables the optional homepage preview on Projects.
       - name: photo
         label: Project photo
         type: image

@@ -1,4 +1,5 @@
 import { Photo } from './Photo';
+import { ProjectLinks } from './ProjectLinks';
 import { useDialog } from '../utils/useDialog';
 import { type ProjectCaseFile } from '../data/siteData';
 
@@ -107,21 +108,7 @@ export function ProjectDrawer({ project, onClose }: ProjectDrawerProps) {
             </dl>
           )}
 
-          {project.links && project.links.length > 0 && (
-            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
-              {project.links.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="t-ui link"
-                >
-                  {l.label}
-                </a>
-              ))}
-            </div>
-          )}
+          <ProjectLinks project={project} />
         </div>
       </div>
     </div>
