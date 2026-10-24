@@ -1,9 +1,8 @@
-import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Send } from 'lucide-react';
 import { deliverAnonymousNote, NOTE_LIMIT } from '../utils/anonymousNotes';
-const KeepItUp = lazy(() => import('./KeepItUp'));
 
-export function AnonymousNote({ relayUrl, reducedMotion, theme }: { relayUrl: string; reducedMotion: boolean; theme: 'dark' | 'light' }) {
+export function AnonymousNote({ relayUrl }: { relayUrl: string }) {
   const [message, setMessage] = useState('');
   const [honey, setHoney] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
@@ -27,7 +26,7 @@ export function AnonymousNote({ relayUrl, reducedMotion, theme }: { relayUrl: st
     }
   };
   return <div className="anonymous-note mt-12 max-w-3xl" data-reveal="up">
-    <div className="note-form-heading"><div><h3 className="t-h3">Leave me an anonymous note.</h3><p className="t-ui text-ash mt-3">A thought, a question, or something I could do better. Just your words, sent privately to me.</p></div>{!reducedMotion && <Suspense fallback={<div className="game-placeholder" aria-hidden="true" />}><KeepItUp theme={theme} /></Suspense>}</div>
+    <div className="note-form-heading"><h3 className="t-h3">Leave me an anonymous note.</h3><p className="t-ui text-ash mt-3">A thought, a question, or something I could do better. Just your words, sent privately to me.</p></div>
     <form onSubmit={submit} method="post" aria-label="Anonymous note" className="mt-6">
       <label className="t-meta text-bone" htmlFor="anonymous-message">Your note</label>
       <textarea id="anonymous-message" name="message" className="note-textarea t-ui mt-3" placeholder="What’s on your mind?" value={message} onChange={event => { setMessage(event.target.value); if (status !== 'sending') setStatus('idle'); }} required minLength={1} maxLength={NOTE_LIMIT} rows={5} disabled={!endpoint || status === 'sending'} aria-describedby="note-privacy note-status" />

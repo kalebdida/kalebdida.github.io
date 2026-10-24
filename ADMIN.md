@@ -71,18 +71,15 @@ Deploy the relay once using [netlify/README.md](netlify/README.md),
 then paste its public HTTPS URL into **Site → Private message delivery → Relay URL**.
 Bot tokens and chat IDs belong only in Netlify's server environment variables. **Never put
 secrets into this CMS field.** Without a relay URL, sending is disabled and the
-counter is hidden. Send a test note after setup and confirm receipt in Telegram.
+counter shows **Not connected yet**. Send a test note after setup and confirm receipt in Telegram.
 
 The page-visit count appears as a regular contact card, with the current theme's
 colors and typography. It is not clickable. The relay gets the existing
 `kalebdida/portfolio-site-20261024` total from dwyl Hits and returns a number. This
-is a page-view count, not a unique-person count. Local previews are excluded;
-network errors never become invented numbers.
-
-The small **Keep it up** game beside the form starts only when Play is pressed.
-Move the paddle with a mouse, a finger or arrow keys. It pauses when scrolled
-off-screen, when focus leaves the board or when the tab is hidden. It is omitted
-when a visitor prefers reduced motion.
+is a page-view count, not a unique-person count. The card stays visible in both
+themes, independent of scroll animations. Local previews do not increment the
+counter and show **Available on the live site**. Network errors show **Count
+unavailable**; no invented number is substituted.
 
 The `/projects` page shows every case file with its available links. Edit
 **Projects → Live app URL** to enable an optional live homepage preview. The app

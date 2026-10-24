@@ -799,7 +799,7 @@ export default function App() {
                   ))}
                   <VisitorCount relayUrl={SITE_DATA.contact.relayUrl} siteUrl={SITE_DATA.identity.url} />
                 </dl>
-                <AnonymousNote relayUrl={SITE_DATA.contact.relayUrl} reducedMotion={reducedMotion} theme={theme} />
+                <AnonymousNote relayUrl={SITE_DATA.contact.relayUrl} />
               </div>
 
               <footer className="relative mt-24 pt-6 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 t-meta text-ash">

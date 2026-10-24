@@ -66,5 +66,6 @@ npx wrangler deploy --dry-run --config workers/contact/wrangler.toml
 ```
 
 Tests replace outbound requests and never send real notes. The frontend deliberately
-disables message submission and hides the numeric counter until a relay URL is
-configured. There is no fallback to email delivery.
+disables message submission until a relay URL is configured. The themed counter
+card stays visible, with a connection, preview or unavailable status when a number
+cannot be shown. There is no fallback to email delivery.

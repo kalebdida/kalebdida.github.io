@@ -855,8 +855,7 @@ main h1.t-title { transform: skewY(var(--scroll-skew)); transition: transform 25
 
 /* A private note and a small live counter remain part of Say hi. */
 .anonymous-note { padding: clamp(1.25rem, 4vw, 2rem); border: 1px solid var(--color-hair); border-radius: var(--radius); background: rgb(var(--raised-rgb) / .85); }
-.note-form-heading { display: grid; grid-template-columns: minmax(0, 1fr) 220px; align-items: center; gap: 1.5rem; }
-.note-form-heading:not(:has(.keep-it-up, .game-placeholder)) { grid-template-columns: 1fr; }
+.note-form-heading { max-width: 58ch; }
 .note-textarea { display: block; width: 100%; min-height: 150px; padding: 1rem; color: var(--color-bone); background: var(--color-night); border: 1px solid var(--color-ash); border-radius: var(--radius); resize: vertical; line-height: 1.6; }
 .note-textarea::placeholder { color: var(--color-ash); }
 .note-textarea:focus { border-color: var(--color-signal); }
@@ -871,13 +870,6 @@ main h1.t-title { transform: skewY(var(--scroll-skew)); transition: transform 25
 .footer-byline { display: flex; flex-direction: column; gap: 1rem; }
 .visitor-count-card { cursor: default; }
 .visitor-count-card dd { font-variant-numeric: tabular-nums; }
-.keep-it-up, .game-placeholder { width: 220px; max-width: 100%; }
-.game-placeholder { height: 220px; }
-.game-caption, .game-controls { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
-.keep-it-up canvas { width: 100%; aspect-ratio: 8 / 5; display: block; margin: .6rem 0; border: 1px solid var(--color-hair); border-radius: var(--radius); background: var(--color-night); touch-action: pan-y; cursor: ew-resize; }
-.keep-it-up[data-playing='true'] canvas { touch-action: none; }
-.keep-it-up > p { margin-top: .5rem; font-size: 11px; }
-.game-controls button { min-height: 32px; }
 .projects-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 2rem; margin: 3rem 0 4rem; }
 .projects-heading > a, .project-links a, .project-card-copy > button, .project-preview-controls button { display: inline-flex; align-items: center; gap: .55rem; }
 .projects-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; align-items: start; }
@@ -897,5 +889,4 @@ main h1.t-title { transform: skewY(var(--scroll-skew)); transition: transform 25
 .project-card-copy { padding: clamp(1.25rem, 3vw, 2rem); }
 .project-links { display: flex; flex-wrap: wrap; gap: 1rem 1.75rem; margin-top: 2rem; }
 @media (max-width: 767px) { .projects-grid { grid-template-columns: 1fr; } }
-@media (max-width: 639px) { .note-form-heading { grid-template-columns: 1fr; } .keep-it-up, .game-placeholder { justify-self: center; width: 260px; } }
 @media print { .anonymous-note, .visitor-count-card { display: none; } }
