@@ -14,8 +14,12 @@ display a plain number using its own theme. There is no badge or redirect.
 You need access to your Cloudflare account and your existing bot's token. Keep the
 token out of chat, source control, Pages CMS, and frontend environment variables.
 
+The [Workers Free plan](https://developers.cloudflare.com/workers/platform/pricing/)
+includes 100,000 requests per day and suits this relay. Keep the account on Free;
+this setup does not require a paid subscription or a custom domain.
+
 1. Open your bot's conversation in Telegram and press **Start**.
-2. In this repository, run:
+2. In this repository's **source** branch, run:
 
    ```sh
    npx wrangler login
@@ -44,8 +48,9 @@ origins to `SITE_ORIGIN` and caps note length and request-body size. Rate-limiti
 keys are hashed; request details are not included in messages. Avoid adding logs
 that include messages, request bodies, bot tokens, or chat IDs.
 
-For Cloudflare's GitHub deployment UI, use `workers/contact` as the root directory
-and `npx wrangler deploy` as the deploy command. Add the two secrets in the Worker's
+For Cloudflare's GitHub deployment UI, select **source** as the production branch,
+use `workers/contact` as the root directory and `npx wrangler deploy` as the deploy
+command. Add the two secrets in the Worker's
 **Settings → Variables and Secrets**. The Wrangler configuration must be used so
 that both rate-limit bindings are provisioned.
 
