@@ -17,6 +17,8 @@ import { Arrow, Motif, Rank, RevealWords, SocialIcon, spotlight } from './compon
 import { useDialog } from './utils/useDialog';
 import { useReveals } from './utils/useReveals';
 import { ResumeDownload } from './components/ResumeDownload';
+import { AnonymousNote } from './components/AnonymousNote';
+import { VisitorCount } from './components/VisitorCount';
 import { Photo } from './components/Photo';
 import { Piano } from './components/Piano';
 import { Celebration } from './components/Celebration';
@@ -791,13 +793,17 @@ export default function App() {
                     </div>
                   ))}
                 </dl>
+                <AnonymousNote email={SITE_DATA.identity.email} reducedMotion={reducedMotion} />
               </div>
 
               <footer className="relative mt-24 pt-6 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 t-meta text-ash">
                 <div className="absolute top-0 left-0 right-0 h-px bg-hair" />
-                <span>
-                  © {new Date().getFullYear()} {SITE_DATA.identity.name}
-                  <span className="t-geez ml-2">{SITE_DATA.identity.geezName}</span>
+                <span className="footer-byline">
+                  <VisitorCount siteUrl={SITE_DATA.identity.url} />
+                  <span>
+                    © {new Date().getFullYear()} {SITE_DATA.identity.name}
+                    <span className="t-geez ml-2">{SITE_DATA.identity.geezName}</span>
+                  </span>
                 </span>
                 <span className="flex flex-wrap items-center gap-6"><button type="button" data-magnetic onClick={() => scrollToSection('hero')} className="link-quiet">Back to top</button>
                   <button type="button" onClick={() => navigateTo('/now')} className="link-quiet">

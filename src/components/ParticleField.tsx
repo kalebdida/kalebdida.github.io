@@ -68,6 +68,8 @@ const VERTEX_SHADER = /* glsl */ `
   uniform float uAspect;
   uniform float uRippleAge;
   uniform vec2 uRippleOrigin;
+  uniform float uSparkAge;
+  uniform vec2 uSparkOrigin;
   uniform float uHl3;
   uniform float uHl3Amt;
   uniform float uHl4;
@@ -177,6 +179,14 @@ const VERTEX_SHADER = /* glsl */ `
     float push = (1.0 - smoothstep(0.0, 0.32, dist)) * uMouseStrength * (1.0 - uCalm);
     push *= 1.0 - .96 * clamp(wBrain + wTriad + wConst + wLight, 0.0, 1.0);
     mv.xy += (d / max(dist, 0.0001)) * push * 0.45 * (-mv.z / 7.0);
+    // A small, user-triggered ripple grows outward from the contact light.
+    float sparkBoost = 0.0;
+    if (uSparkAge < 2.1) {
+      vec2 sd = ndc - uSparkOrigin; sd.x *= uAspect;
+      float radius = length(sd);
+      sparkBoost = exp(-pow(radius - uSparkAge * .72, 2.0) * 95.0) * (1.0 - uSparkAge / 2.1);
+      mv.xy += sd / max(radius, .001) * sparkBoost * .13;
+    }
     gl_Position = projectionMatrix * mv;
 
     float hl = max(sel(g3, uHl3) * wTriad * uHl3Amt, sel(g4, uHl4) * wConst * uHl4Amt);
@@ -185,7 +195,7 @@ const VERTEX_SHADER = /* glsl */ `
 
     float base = mix(1.4, 2.6, fract(aSeed * 17.3)) * uSizeScale;
     float size = base * (1.0 + wConst * isCore * 0.8 + hl * 1.1 + wLight * (1.0 - isRing) * 1.4 + wSpread * 0.7 + wMind * 0.25)
-               + rippleBoost * 2.5 + push * 1.6 + firing * 2.0;
+               + rippleBoost * 2.5 + push * 1.6 + firing * 2.0 + sparkBoost * 2.0;
     size *= 1.0 + uTransition * .25;
     gl_PointSize = size * uPixelRatio * min(8.0 / max(1.0, -mv.z), 1.7);
 
@@ -196,7 +206,8 @@ const VERTEX_SHADER = /* glsl */ `
     vAlpha = depthFade * mix(0.5, 0.15, uCalm) * lightDensity * twinkle * (1.0 + hl * 1.4 + firing * 2.0 + wSpread * 1.1 + wMind * 0.9);
     vAlpha *= mix(1.0, .2 + aPortraitBrightness * 1.8, wBrain * uPortrait);
     vAlpha *= 1.0 + uTransition * .25;
-    vAccent = clamp(wLight * (1.0 - isRing * 0.5) + rippleBoost * 0.85 + hl + firing + push * 0.6, 0.0, 1.0);
+    vAlpha *= 1.0 + sparkBoost * .65;
+    vAccent = clamp(wLight * (1.0 - isRing * 0.5) + rippleBoost * 0.85 + hl + firing + push * 0.6 + sparkBoost, 0.0, 1.0);
   }
 `;
 
@@ -335,6 +346,8 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         uAspect: { value: window.innerWidth / Math.max(1, window.innerHeight) },
         uRippleAge: { value: 99 },
         uRippleOrigin: { value: new THREE.Vector2(0, 0) },
+        uSparkAge: { value: 99 },
+        uSparkOrigin: { value: new THREE.Vector2(0, 0) },
         uHl3: { value: -1 },
         uHl3Amt: { value: 0 },
         uHl4: { value: -1 },
@@ -433,6 +446,18 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
       rippleStart = performance.now() * 0.001;
     };
     window.addEventListener('kal:piano-ripple', onPianoRipple);
+    let sparkStart = -100;
+    const onContactSpark = () => {
+      const rect = anchors.rectangles.get('light');
+      if (!rect) return;
+      material.uniforms.uSparkOrigin.value.set(
+        (rect.left - window.scrollX + rect.width / 2) / window.innerWidth * 2 - 1,
+        1 - (rect.top - window.scrollY + rect.height / 2) / window.innerHeight * 2,
+      );
+      sparkStart = performance.now() * .001;
+      container.dataset.sparkAt = String(sparkStart);
+    };
+    window.addEventListener('kal:contact-spark', onContactSpark);
 
     // pointer
     const mouseTarget = new THREE.Vector2(9, 9);
@@ -564,6 +589,7 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         u.uIntro.value = Math.min(1, (now - startTime) / 2.6);
         u.uCalm.value = curCalm;
         u.uRippleAge.value = Math.max(0, now - rippleStart);
+        u.uSparkAge.value = Math.max(0, now - sparkStart);
         u.uHl3.value = hl3Index;
         u.uHl3Amt.value = hl3Amt;
         u.uHl4.value = hl4Index;
@@ -597,6 +623,7 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
       cancelAnimationFrame(frameId);
       clearTimeout(frameId);
       window.removeEventListener('kal:piano-ripple', onPianoRipple);
+      window.removeEventListener('kal:contact-spark', onContactSpark);
       window.removeEventListener('kal:theme', onTheme);
       window.removeEventListener('pointermove', onPointerMove);
       document.removeEventListener('pointerleave', onPointerLeave);

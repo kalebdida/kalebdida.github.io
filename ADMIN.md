@@ -59,12 +59,42 @@ For projects, **Short home-page summary** controls the one-line introduction. Th
 
 Use sentence case and correct proper nouns. Avoid em dashes. Leave unknown dates, achievements, counts and links out. Keep existing project IDs and published post filenames stable.
 
-## Development
+## Anonymous notes and visits
+
+The note form is inside **Say hi**, below the contact cards. It uses FormSubmit
+to deliver private notes to the email in **Site → Identity → Email**. Visitors
+do not enter a name or email address, and messages are not published on the site.
+
+**One-time activation:** send a note using the live form. If delivery is not yet
+confirmed, choose **Try direct delivery in a new tab**. This opens FormSubmit’s
+normal submission and activation flow. Open its activation email in the destination
+inbox and click **Activate Form**. Check Spam if it does not arrive. Send a second
+note after activation to confirm receipt. The site
+shows success only when the provider confirms delivery; it keeps the text if
+delivery fails or cannot be confirmed. Changing the destination email requires
+activating the new address too.
+
+FormSubmit supplies delivery and spam filtering; the form also includes a
+honeypot. Notes are sent through a third-party service, whose privacy policy is
+linked below the form. There is no website database or browser-readable secret.
+
+The footer badge uses **dwyl Hits** with the separate counter
+`kalebdida/portfolio-site-20261024`. It counts page views from this addition, not
+historical visitors or unique people. It loads on the home page, and local previews
+are excluded. Refreshes may add views. It never displays
+an invented number; a failed badge request shows **Count unavailable**. The badge
+service may receive normal request data such as IP address and browser user agent.
+
+**Send a spark** triggers a brief ripple in the existing contact particles. It is
+hidden for visitors who prefer reduced motion.
+
+## Development commands
 
 ```sh
 npm ci
 npx tsc --noEmit
 npx tsx --test src/utils/logic.test.ts
+npx tsx --test src/utils/anonymousNotes.test.ts
 npm run build
 npm run dev
 ```
