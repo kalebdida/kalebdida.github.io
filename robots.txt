@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kalebdida.github.io/sitemap.xml
+
+# Hey. You found piece 3 of 3:
+# ctf_part_3: these_years}
+# Piece 1 is base64 in the page source. Piece 2 is in the browser console.
+# When you have the whole flag, type it anywhere on the site.
