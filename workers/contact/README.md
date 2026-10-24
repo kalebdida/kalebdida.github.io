@@ -1,5 +1,9 @@
 # Private contact relay
 
+The recommended setup is now [Netlify](../../netlify/README.md). This folder keeps
+the shared request handler and optional Cloudflare adapter. Use the Netlify guide
+to avoid Cloudflare setup; the portfolio accepts the same public Relay URL.
+
 This small Cloudflare Worker accepts a note from the portfolio and forwards the
 text to the owner's existing Telegram bot. The browser sends only the note and a
 honeypot field to `/notes`. It never receives the bot token, chat ID, bot username,

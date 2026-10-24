@@ -67,9 +67,9 @@ private relay into the owner's existing Telegram bot. Email delivery and the
 external FormSubmit form have been removed. The website does not expose the bot,
 its token or its destination chat ID. Visitors provide only their note.
 
-Deploy the relay once using [workers/contact/README.md](workers/contact/README.md),
+Deploy the relay once using [netlify/README.md](netlify/README.md),
 then paste its public HTTPS URL into **Site → Private message delivery → Relay URL**.
-Bot tokens and chat IDs belong only in the Worker's secret fields. **Never put
+Bot tokens and chat IDs belong only in Netlify's server environment variables. **Never put
 secrets into this CMS field.** Without a relay URL, sending is disabled and the
 counter is hidden. Send a test note after setup and confirm receipt in Telegram.
 
@@ -91,6 +91,7 @@ npx tsc --noEmit
 npx tsx --test src/utils/logic.test.ts
 npx tsx --test src/utils/anonymousNotes.test.ts
 node --test workers/contact/worker.test.mjs
+node --test netlify/relay.test.mjs
 npm run build
 npm run dev
 ```

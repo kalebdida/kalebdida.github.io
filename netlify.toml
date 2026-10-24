@@ -1,0 +1,11 @@
+[build]
+base = "netlify"
+command = "node --test relay.test.mjs"
+publish = "public"
+
+[build.environment]
+NODE_VERSION = "22"
+
+[functions]
+directory = "functions"
+node_bundler = "esbuild"
