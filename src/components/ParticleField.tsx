@@ -346,8 +346,11 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
     points.frustumCulled = false;
     scene.add(points);
 
+    // bloom renders through an opaque buffer: fine on the dark theme, but it draws a dark veil over the light theme
+    let lightTheme = false;
     const applyTheme = (theme = document.documentElement.dataset.theme) => {
       const light = theme === 'light';
+      lightTheme = light;
       material.uniforms.uBone.value.set(light ? '#242429' : '#edeae3');
       material.uniforms.uSignal.value.set(light ? '#006f9c' : '#5ad1ff');
       material.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending;
@@ -584,7 +587,7 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         camera.updateMatrixWorld();
         updateAnchors(now);
 
-        if (bloomEnabled && composer) composer.render();
+        if (bloomEnabled && composer && !lightTheme) composer.render();
         else renderer.render(scene, camera);
       }
 
