@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+ <defs><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="#8A8A93" opacity=".35"/></pattern><radialGradient id="glow"><stop stop-color="#5AD1FF" stop-opacity=".12"/><stop offset="1" stop-color="#0A0A0C" stop-opacity="0"/></radialGradient></defs>
+ <rect width="1200" height="630" fill="#0A0A0C"/><rect x="720" width="480" height="630" fill="url(#dots)"/><ellipse cx="920" cy="310" rx="300" ry="300" fill="url(#glow)"/>
+ <path d="M70 72h1060M70 558h1060" stroke="#1E1E24"/><circle cx="84" cy="112" r="4" fill="#5AD1FF"/>
+ <text x="103" y="120" fill="#8A8A93" font-family="Arial,sans-serif" font-size="20">Addis Ababa, Ethiopia</text>
+ <text x="70" y="310" fill="#EDEAE3" font-family="Georgia,serif" font-size="116" letter-spacing="-5">Kaleb Dida</text>
+ <text x="76" y="388" fill="#8A8A93" font-family="Georgia,serif" font-size="33">Minds, machines, and the locks between them.</text>
+ <g stroke="#5AD1FF" stroke-opacity=".55"><ellipse cx="988" cy="300" rx="125" ry="52" transform="rotate(-24 988 300)"/><ellipse cx="988" cy="300" rx="70" ry="140" transform="rotate(25 988 300)"/><circle cx="988" cy="300" r="88"/></g><circle cx="988" cy="300" r="4" fill="#5AD1FF"/>
+ <text x="76" y="525" fill="#8A8A93" font-family="Arial,sans-serif" font-size="20">Cognitive science · Security · Robotics · Writing</text><text x="888" y="525" fill="#EDEAE3" font-family="Arial,sans-serif" font-size="18">kalebdida.github.io</text>
+</svg>
