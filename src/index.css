@@ -890,3 +890,17 @@ main h1.t-title { transform: skewY(var(--scroll-skew)); transition: transform 25
 .project-links { display: flex; flex-wrap: wrap; gap: 1rem 1.75rem; margin-top: 2rem; }
 @media (max-width: 767px) { .projects-grid { grid-template-columns: 1fr; } }
 @media print { .anonymous-note, .visitor-count-card { display: none; } }
+
+/* build-time HTML for crawlers and first paint; React replaces it on load */
+.prerender { max-width: 46rem; margin: 0 auto; padding: 6rem 1.5rem 4rem; font-family: var(--font-serif); color: var(--color-bone); line-height: 1.6; }
+.prerender h1 { font-size: clamp(2.5rem, 7vw, 4.5rem); line-height: 1; margin: 2rem 0 1rem; letter-spacing: -0.02em; }
+.prerender h2 { font-size: 1.75rem; margin: 2.5rem 0 .75rem; }
+.prerender h3 { font-size: 1.25rem; margin: 1rem 0 .25rem; }
+.prerender p, .prerender li, .prerender dd { color: var(--color-ash); }
+.prerender p { margin: .65rem 0; }
+.prerender a { color: var(--color-bone); text-decoration: underline; text-underline-offset: .25em; }
+.prerender nav, .prerender footer { font-family: var(--font-sans); font-size: .9375rem; color: var(--color-ash); }
+.prerender ul { padding-left: 1.1rem; list-style: disc; }
+.prerender li { margin: .35rem 0; }
+.prerender dt { font-family: var(--font-sans); font-size: .875rem; color: var(--color-ash); margin-top: .75rem; }
+.prerender dd { color: var(--color-bone); }
