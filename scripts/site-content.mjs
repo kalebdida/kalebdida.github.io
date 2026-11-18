@@ -44,7 +44,7 @@ export function renderPage(template, route, { identity, person, content, posts }
   const image = `${identity.url}/og-image.png`;
   const p = route.post;
   const graph = [
-    { '@type': 'WebSite', '@id': `${identity.url}/#website`, url: `${identity.url}/`, name: identity.shortName, inLanguage: 'en' },
+    { '@type': 'WebSite', '@id': `${identity.url}/#website`, url: `${identity.url}/`, name: identity.shortName, alternateName: [identity.name, `${identity.shortName} (${identity.handle})`], inLanguage: 'en' },
     { ...person, '@context': undefined, '@id': `${identity.url}/#person`, image: `${identity.url}${identity.portraitDark}` },
     route.path === ''
       ? { '@type': 'ProfilePage', '@id': `${url}#page`, url, name: route.title, mainEntity: { '@id': `${identity.url}/#person` }, isPartOf: { '@id': `${identity.url}/#website` } }
