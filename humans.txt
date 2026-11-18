@@ -1,0 +1,10 @@
+/* TEAM */
+Built by: Kaleb Dida Abera (Kal)
+From: Addis Ababa, Ethiopia
+Site: https://kalebdida.github.io
+
+/* SITE */
+Stack: React, Vite, Tailwind, three.js
+Fonts: Newsreader, Geist, Noto Serif Ethiopic
+Hosting: GitHub Pages
+Last build: 2026-11-18
