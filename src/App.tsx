@@ -20,6 +20,9 @@ import { ResumeDownload } from './components/ResumeDownload';
 import { AnonymousNote } from './components/AnonymousNote';
 import { VisitorCount } from './components/VisitorCount';
 import { Photo } from './components/Photo';
+import photoManifest from 'virtual:photos';
+// particles only need a tiny image to sample, so use the smallest WebP instead of the 2 MB original
+const particleSrc = (src?: string) => (src && photoManifest[src]?.srcSet.split(' ')[0]) || src;
 import { Piano } from './components/Piano';
 import { Celebration } from './components/Celebration';
 import { DecodeLabel } from './components/DecodeLabel';
@@ -207,9 +210,9 @@ export default function App() {
     journeyDrift: 0,
     hl3: -1,
     hl4: -1,
-    portrait: portraitSrc,
+    portrait: particleSrc(portraitSrc),
   });
-  sceneRef.current.portrait = portraitSrc;
+  sceneRef.current.portrait = particleSrc(portraitSrc);
 
   useEffect(() => {
     if (!showLoader) return;
