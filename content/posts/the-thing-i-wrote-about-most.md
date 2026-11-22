@@ -1,8 +1,8 @@
 ---
 title: "The thing I wrote about most was the thing I forgot"
-date: "2026-11-22"
-summary: "A personal essay on Medium."
-tags: ["Essay"]
+date: "2026-11-23"
+summary: "A one-week experiment on what rereading our own writing reveals: nine patterns in seven journal entries, and the one I wrote about most but forgot."
+tags: ["Cognitive science", "Memory", "Journaling"]
 draft: false
 status: "published"
 thumbnail: ""

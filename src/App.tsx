@@ -319,6 +319,15 @@ export default function App() {
     }
 
     let lastY = window.scrollY, lastScrollTime = performance.now(), skewTimer: number | undefined;
+    // set the skew on the few headings that use it; a variable on <html> restyles the whole page every scroll
+    let skewTargets: HTMLElement[] = [], skewNow = 0;
+    const setSkew = (deg: number) => {
+      if (Math.abs(deg - skewNow) < 0.05 && deg !== 0) return;
+      if (deg === skewNow) return;
+      skewNow = deg;
+      if (!skewTargets.length || !skewTargets[0].isConnected) skewTargets = Array.from(document.querySelectorAll<HTMLElement>('.home-section h2, .contact-title, #hero h1, main > div > h1, main h1.t-title'));
+      for (const el of skewTargets) el.style.setProperty('--scroll-skew', `${deg}deg`);
+    };
     // chapter tops are page coordinates, so measure them on resize only, never per scroll
     let tops: number[] = [];
     const measure = () => {
@@ -356,9 +365,9 @@ export default function App() {
       // ...then writes, so the browser never lays out twice in one scroll
       if (!reduced) {
         const speed = (scrollY - lastY) / Math.max(16, now - lastScrollTime);
-        document.documentElement.style.setProperty('--scroll-skew', `${Math.max(-1.4, Math.min(1.4, speed * .16))}deg`);
+        setSkew(Math.max(-1.4, Math.min(1.4, speed * .16)));
         clearTimeout(skewTimer);
-        skewTimer = window.setTimeout(() => document.documentElement.style.setProperty('--scroll-skew', '0deg'), 90);
+        skewTimer = window.setTimeout(() => setSkew(0), 90);
       }
       lastY = scrollY; lastScrollTime = now;
       progressRef.current?.style.setProperty('--p', String(Math.min(1, Math.max(0, scrollY / max))));
@@ -391,7 +400,7 @@ export default function App() {
       sizeWatch?.disconnect();
       cancelAnimationFrame(rafId);
       clearTimeout(skewTimer);
-      document.documentElement.style.setProperty('--scroll-skew', '0deg');
+      setSkew(0);
       lenis?.destroy();
     };
   }, [route.page, reducedMotion]);
