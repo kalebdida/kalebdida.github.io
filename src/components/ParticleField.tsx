@@ -368,6 +368,7 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
     let bloomEnabled = !software && !isMobile;
     if (bloomEnabled) {
       composer = new EffectComposer(renderer);
+      composer.setPixelRatio(1);
       composer.addPass(new RenderPass(scene, camera));
       bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), 0.38, 0.45, 0.72);
       composer.addPass(bloomPass);
@@ -525,8 +526,13 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
       const frameMs = (now - lastTime) * 1000;
       lastTime = now;
 
-      if (bloomEnabled && frameMs > 28) {
-        if (++slowFrames > 24) bloomEnabled = false;
+      if (frameMs > 28 && !hidden) {
+        // struggling: first drop bloom, then render at 1x
+        if (++slowFrames > 24) {
+          slowFrames = 0;
+          if (bloomEnabled) bloomEnabled = false;
+          else if (renderer.getPixelRatio() > 1) { renderer.setPixelRatio(1); renderer.setSize(window.innerWidth, window.innerHeight); }
+        }
       } else {
         slowFrames = Math.max(0, slowFrames - 1);
       }

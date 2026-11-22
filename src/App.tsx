@@ -319,10 +319,41 @@ export default function App() {
     }
 
     let lastY = window.scrollY, lastScrollTime = performance.now(), skewTimer: number | undefined;
+    // chapter tops are page coordinates, so measure them on resize only, never per scroll
+    let tops: number[] = [];
+    const measure = () => {
+      tops = CHAPTERS.map((c) => {
+        const el = document.getElementById(c.id);
+        return el ? el.getBoundingClientRect().top + window.scrollY : Infinity;
+      });
+    };
+    let measured = false;
     const update = () => {
       const vh = window.innerHeight;
       const scrollY = window.scrollY;
       const now = performance.now();
+      if (!measured) { measure(); measured = true; }
+
+      // all layout reads first...
+      let journeyDrift = -1, jp = -1, nearest = -1;
+      const milestones = route.page === 'home' ? Array.from(journeyListRef.current?.querySelectorAll('li') ?? []) : [];
+      if (route.page === 'home') {
+        const journey = document.getElementById('journey');
+        if (journey) { const r = journey.getBoundingClientRect(); journeyDrift = Math.min(1, Math.max(0, (vh * 0.6 - r.top) / Math.max(1, r.height))); }
+        const list = journeyListRef.current;
+        if (list) {
+          const r = list.getBoundingClientRect();
+          jp = Math.min(1, Math.max(0, (vh * 0.62 - r.top) / Math.max(1, r.height)));
+          // only look for the current milestone while the list is near the screen
+          if (r.bottom > -vh && r.top < vh * 2) {
+            let distance = Infinity;
+            milestones.forEach((el, i) => { const m = el.getBoundingClientRect(); const d = Math.abs(m.top + m.height / 2 - vh / 2); if (d < distance) { distance = d; nearest = i; } });
+          }
+        }
+      }
+      const max = Math.max(1, document.documentElement.scrollHeight - vh);
+
+      // ...then writes, so the browser never lays out twice in one scroll
       if (!reduced) {
         const speed = (scrollY - lastY) / Math.max(16, now - lastScrollTime);
         document.documentElement.style.setProperty('--scroll-skew', `${Math.max(-1.4, Math.min(1.4, speed * .16))}deg`);
@@ -330,49 +361,34 @@ export default function App() {
         skewTimer = window.setTimeout(() => document.documentElement.style.setProperty('--scroll-skew', '0deg'), 90);
       }
       lastY = scrollY; lastScrollTime = now;
-      const max = Math.max(1, document.documentElement.scrollHeight - vh);
       progressRef.current?.style.setProperty('--p', String(Math.min(1, Math.max(0, scrollY / max))));
-
       if (route.page !== 'home') return;
 
       // which chapter we're in, as a continuous number (2.4 = 40% from chapter 2 to 3)
-      const tops = CHAPTERS.map((c) => {
-        const el = document.getElementById(c.id);
-        return el ? el.getBoundingClientRect().top + scrollY : Infinity;
-      });
       const center = scrollY + vh * 0.5;
       let stage = 0;
       for (let i = 0; i < tops.length - 1; i++) {
         if (!Number.isFinite(tops[i + 1])) continue;
-        // each boundary crossed adds up to 1
         stage += Math.min(1, Math.max(0, (center - (tops[i + 1] - vh * 0.32)) / (vh * 0.6)));
       }
       sceneRef.current.stage = stage;
       const nextChapter = Math.round(stage);
       setChapter((prev) => (prev === nextChapter ? prev : nextChapter));
-
-      const journey = document.getElementById('journey');
-      if (journey) {
-        const r = journey.getBoundingClientRect();
-        sceneRef.current.journeyDrift = Math.min(1, Math.max(0, (vh * 0.6 - r.top) / Math.max(1, r.height)));
-      }
-      const milestones = Array.from(journeyListRef.current?.querySelectorAll('li') ?? []);
-      let nearest = 0, distance = Infinity;
-      milestones.forEach((el, i) => { const r = el.getBoundingClientRect(); const d = Math.abs(r.top + r.height / 2 - vh / 2); if (d < distance) { distance = d; nearest = i; } });
-      milestones.forEach((el, i) => el.classList.toggle('is-current', i === nearest));
-      const list = journeyListRef.current;
-      if (list) {
-        const r = list.getBoundingClientRect();
-        list.style.setProperty('--jp', String(Math.min(1, Math.max(0, (vh * 0.62 - r.top) / Math.max(1, r.height)))));
-      }
+      if (journeyDrift >= 0) sceneRef.current.journeyDrift = journeyDrift;
+      if (nearest >= 0) milestones.forEach((el, i) => el.classList.toggle('is-current', i === nearest));
+      if (jp >= 0) journeyListRef.current?.style.setProperty('--jp', String(jp));
     };
+    const onResize = () => { measure(); update(); };
+    const sizeWatch = 'ResizeObserver' in window ? new ResizeObserver(() => { measured = false; }) : null;
+    sizeWatch?.observe(document.body);
 
     window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
+    window.addEventListener('resize', onResize);
     update();
     return () => {
       window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
+      window.removeEventListener('resize', onResize);
+      sizeWatch?.disconnect();
       cancelAnimationFrame(rafId);
       clearTimeout(skewTimer);
       document.documentElement.style.setProperty('--scroll-skew', '0deg');
@@ -501,7 +517,7 @@ export default function App() {
       {reducedMotion ? <div className="static-field" aria-hidden="true" /> : <Suspense fallback={<div className="static-field" aria-hidden="true" />}><ParticleField mode={route.page === 'home' ? 'home' : route.page === 'notfound' ? 'lost' : 'calm'} sceneRef={sceneRef} /></Suspense>}
 
       {/* nav */}
-      <header className="fixed top-0 left-0 right-0 z-30 bg-night/70 backdrop-blur-md border-b border-hair print:hidden">
+      <header className="fixed top-0 left-0 right-0 z-30 bg-night/90 border-b border-hair print:hidden">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           <a
             href="/"
@@ -575,7 +591,7 @@ export default function App() {
           <div className="max-w-6xl mx-auto px-6">
             {/* hero */}
             <section id="hero" data-formation={FORMATION.mind} className="hero-section min-h-[100svh] flex flex-col pt-28 pb-16 sm:pb-20">
-              <div className="hero-portrait-wrap intro-fade" style={delay(850)} aria-hidden="true">
+              <div className="hero-portrait-wrap intro-fade" style={delay(150)} aria-hidden="true">
                 <span className="hero-portrait-frame" />
                 <Photo src={portraitSrc} alt="" eager sizes="(min-width: 1024px) 520px, 45vw" className="hero-portrait" />
               </div>

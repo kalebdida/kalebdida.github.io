@@ -1,3 +1,4 @@
+import { resolve as resolvePath } from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { readFileSync } from 'node:fs';
@@ -36,6 +37,14 @@ export default defineConfig(() => ({
           prepared = await preparePhotos(import.meta.dirname);
           if (this.environment.config.command === 'build') for (const [path, bytes] of prepared.assets) this.emitFile({ type: 'asset', fileName: path.slice(1), source: bytes });
           return `export default ${JSON.stringify(prepared.manifest)};`;
+        },
+        // start downloading the hero portrait with the HTML, before any JavaScript runs
+        async transformIndexHtml(html: string) {
+          prepared ??= await preparePhotos(import.meta.dirname);
+          const site = JSON.parse(readFileSync(resolvePath(import.meta.dirname, 'content/site.json'), 'utf8'));
+          const meta = (prepared.manifest as Record<string, { srcSet: string }>)[site.identity.portraitDark];
+          if (!meta) return html;
+          return html.replace('</head>', `    <link rel="preload" as="image" fetchpriority="high" imagesrcset="${meta.srcSet}" imagesizes="(min-width: 1024px) 520px, 45vw" />\n  </head>`);
         },
         configureServer(server) {
           server.middlewares.use((req, res, next) => {

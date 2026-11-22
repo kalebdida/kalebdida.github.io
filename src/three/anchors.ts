@@ -20,7 +20,6 @@ export class AnchorTracker {
     this.resize?.observe(document.documentElement);
     this.mutations = new MutationObserver(this.schedule);
     this.mutations.observe(document.querySelector('main') ?? document.body, { childList: true, subtree: true });
-    window.addEventListener('scroll', this.schedule, { passive: true });
     window.addEventListener('resize', this.schedule);
     this.measure();
   }
@@ -34,7 +33,7 @@ export class AnchorTracker {
   };
   dispose() {
     cancelAnimationFrame(this.frame); this.resize?.disconnect(); this.mutations.disconnect();
-    window.removeEventListener('scroll', this.schedule); window.removeEventListener('resize', this.schedule);
+    window.removeEventListener('resize', this.schedule);
   }
 }
 
