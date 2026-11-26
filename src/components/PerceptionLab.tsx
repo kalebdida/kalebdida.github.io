@@ -12,14 +12,14 @@ const EXPERIMENTS: { id: Experiment; title: string; time: string; pitch: string 
 ];
 
 /** shared fullscreen stage with Esc to close */
-function Stage({ tone = 'dark', onClose, children, closeOnClick = false }: { tone?: 'dark' | 'white'; onClose: () => void; children: ReactNode; closeOnClick?: boolean }) {
+function Stage({ tone = 'dark', onClose, children, closeOnClick = false, scroll = false }: { tone?: 'dark' | 'white'; onClose: () => void; children: ReactNode; closeOnClick?: boolean; scroll?: boolean }) {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
     document.documentElement.classList.add('afterimage-open');
     window.addEventListener('keydown', onKey);
     return () => { window.removeEventListener('keydown', onKey); document.documentElement.classList.remove('afterimage-open'); };
   }, [onClose]);
-  return createPortal(<div className={`lab-stage is-${tone}`} role="dialog" aria-modal="true" onClick={closeOnClick ? onClose : undefined}>
+  return createPortal(<div className={`lab-stage is-${tone} ${scroll ? 'is-scroll' : ''}`} role="dialog" aria-modal="true" onClick={closeOnClick ? onClose : undefined}>
     {children}
     <button type="button" className="lab-close t-meta" onClick={onClose}>Esc</button>
   </div>, document.body);
@@ -51,6 +51,15 @@ function Afterimage({ src, onClose }: { src: string; onClose: () => void }) {
   </Stage>;
 }
 
+const SPIRAL = (() => {
+  const turns = 9, points: string[] = [];
+  for (let i = 0; i <= 420; i++) {
+    const a = (i / 420) * turns * Math.PI * 2, r = (i / 420) * 48;
+    points.push(`${(50 + r * Math.cos(a)).toFixed(2)},${(50 + r * Math.sin(a)).toFixed(2)}`);
+  }
+  return points.join(' ');
+})();
+
 /** 2. motion aftereffect: a spinning spiral, then a still photo that seems to shrink */
 function Melt({ src, onClose }: { src: string; onClose: () => void }) {
   const [left, setLeft] = useState(20);
@@ -59,21 +68,16 @@ function Melt({ src, onClose }: { src: string; onClose: () => void }) {
     return () => clearInterval(timer);
   }, []);
   const spiral = left > 0;
-  const turns = 9, points: string[] = [];
-  for (let i = 0; i <= 900; i++) {
-    const a = (i / 900) * turns * Math.PI * 2, r = (i / 900) * 48;
-    points.push(`${(50 + r * Math.cos(a)).toFixed(2)},${(50 + r * Math.sin(a)).toFixed(2)}`);
-  }
   return <Stage onClose={onClose} closeOnClick={left <= -8}>
     {spiral ? <>
       <svg viewBox="0 0 100 100" className="lab-spiral" aria-hidden="true">
-        <polyline points={points.join(' ')} fill="none" stroke="#f2efe8" strokeWidth="2.2" />
+        <polyline points={SPIRAL} fill="none" stroke="#f2efe8" strokeWidth="2.2" />
       </svg>
       <span className="lab-dot is-center" aria-hidden="true" />
       <p className="lab-hint t-meta">Keep your eyes on the center · {left}</p>
     </> : <>
-      <img src={src} alt="" className="lab-photo" draggable={false} />
-      <span className="lab-dot is-center" aria-hidden="true" />
+      <img src={src} alt="" className={`lab-photo ${left > -8 ? '' : 'is-dimmed'}`} draggable={false} />
+      {left > -8 && <span className="lab-dot" aria-hidden="true" />}
       {left > -8 ? <p className="lab-hint t-meta">Keep looking at the dot</p> : <Caption title="The photo never moved.">After watching motion in one direction, the neurons that detect it get tired, so a still image seems to flow the other way. It’s called the motion aftereffect, or the waterfall illusion.</Caption>}
     </>}
   </Stage>;
@@ -169,7 +173,7 @@ function Stroop({ onClose }: { onClose: () => void }) {
       <p className="t-meta mt-5 opacity-70">Press Esc to go back</p>
     </div>;
   }
-  return <Stage onClose={onClose}>{body}</Stage>;
+  return <Stage onClose={onClose} scroll={done}>{body}</Stage>;
 }
 
 /** the four experiments, gathered in one place at the end of the home page */
