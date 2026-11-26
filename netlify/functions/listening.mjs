@@ -31,7 +31,9 @@ export async function listening(request, env = process.env, requestUpstream = fe
     const data = await response.json();
     const track = [].concat(data?.recenttracks?.track ?? [])[0];
     if (!track) return reply({ ok: true, track: null });
-    const image = [].concat(track.image ?? []).find(i => i.size === 'large')?.['#text'] || null;
+    // last.fm sends a grey star placeholder when it has no cover art; treat that as no image
+    const art = [].concat(track.image ?? []).find(i => i.size === 'large')?.['#text'] || null;
+    const image = art && !art.includes('2a96cbd8b46e442fc41c2b86b821562f') ? art : null;
     return reply({
       ok: true,
       track: {
