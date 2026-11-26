@@ -44,3 +44,5 @@ node --test netlify/relay.test.mjs workers/contact/worker.test.mjs
 No Cloudflare account, Wrangler commands or manually created bindings are needed
 for this host. The Cloudflare files remain as an optional adapter for the shared
 handler; Netlify does not deploy a Cloudflare Worker.
+
+`/listening` returns the latest Last.fm track (needs LASTFM_API_KEY and LASTFM_USER in Netlify).
