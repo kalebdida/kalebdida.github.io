@@ -187,14 +187,14 @@ const VERTEX_SHADER = /* glsl */ `
 
     // gravity well: hold the mouse down and the field falls toward it, with a slight swirl
     vec2 toMouse = uMouse - ndc;
-    float well = uGravity * exp(-dist * 1.1);
+    float well = uGravity * (0.35 + 0.6 * exp(-dist * 0.6));
     vec2 swirl = vec2(-toMouse.y, toMouse.x) * 0.35;
-    vec2 fall = (toMouse * 0.82 + swirl) * well;
+    vec2 fall = (toMouse * 0.92 + swirl) * well;
     // let go: everything near the well is flung back out in a ring
     float burst = 0.0;
     if (uBurstAge < 1.6) {
-      burst = exp(-pow(dist - uBurstAge * 2.2, 2.0) * 5.0) * (1.0 - uBurstAge / 1.6);
-      fall -= (toMouse / max(dist, 0.0001)) * burst * 0.22;
+      burst = exp(-pow(dist - uBurstAge * 2.6, 2.0) * 3.0) * (1.0 - uBurstAge / 1.6);
+      fall -= (toMouse / max(dist, 0.0001)) * burst * 0.4;
     }
     // ndc offset to view space (fov about 50 degrees)
     mv.xy += vec2(fall.x * uAspect, fall.y) * (-mv.z) * 0.47;
