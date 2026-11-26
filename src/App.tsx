@@ -181,6 +181,23 @@ export default function App() {
     window.addEventListener('blur', reset);
     return () => { reset(); window.removeEventListener('keydown', onDown); window.removeEventListener('keyup', onUp); window.removeEventListener('blur', reset); };
   }, [reducedMotion]);
+
+  // sound: duck the drone while real music plays, and chime as the cursor moves through the field
+  useEffect(() => {
+    const onListening = (event: Event) => soundEngine.setDucked(Boolean((event as CustomEvent<boolean>).detail));
+    let lastX = 0, lastY = 0, lastT = 0;
+    const onMove = (event: PointerEvent) => {
+      if (event.pointerType === 'touch' || !soundEngine.isEnabled()) return;
+      const now = performance.now(), dt = Math.max(1, now - lastT);
+      const speed = Math.hypot(event.clientX - lastX, event.clientY - lastY) / dt;
+      lastX = event.clientX; lastY = event.clientY; lastT = now;
+      // sparse, like brushing through chimes: faster movement rings more often
+      if (speed > 0.25 && Math.random() < Math.min(0.5, speed * 0.18)) soundEngine.chime(event.clientX / window.innerWidth * 2 - 1, speed);
+    };
+    window.addEventListener('kal:listening', onListening);
+    window.addEventListener('pointermove', onMove, { passive: true });
+    return () => { window.removeEventListener('kal:listening', onListening); window.removeEventListener('pointermove', onMove); };
+  }, []);
   const { phase: routePhase, transition } = useRouteCurtain(reducedMotion);
   useCreativeMotion(reducedMotion);
   const [showLoader, setShowLoader] = useState<boolean>(() => {
@@ -214,6 +231,8 @@ export default function App() {
   const [siuuuToast, setSiuuuToast] = useState(false);
   const [flagFound, setFlagFound] = useState(false);
   const [chapter, setChapter] = useState(0);
+  // the drone follows whichever section is in view
+  useEffect(() => { soundEngine.setMood(route.page === 'home' ? CHAPTERS[chapter]?.id ?? 'hero' : 'calm'); }, [chapter, route.page]);
   const clock = useAdamaClock();
   const flagDialogRef = useDialog(flagFound, () => setFlagFound(false));
   useReveals();

@@ -69,6 +69,7 @@ const VERTEX_SHADER = /* glsl */ `
   uniform float uRippleAge;
   uniform float uMusic;
   uniform float uGravity;
+  uniform vec2 uGaze;
   uniform float uBurstAge;
   uniform vec2 uRippleOrigin;
   uniform float uHl3;
@@ -82,6 +83,7 @@ const VERTEX_SHADER = /* glsl */ `
   float sel(float idx, float i) { return 1.0 - step(0.5, abs(idx - i)); }
 
   vec3 rotY(vec3 p, float a) { float c = cos(a), s = sin(a); return vec3(p.x * c + p.z * s, p.y, -p.x * s + p.z * c); }
+  vec3 gaze(vec3 p, vec2 a) { p = rotY(p, a.x); float c = cos(a.y), s = sin(a.y); return vec3(p.x, c * p.y - s * p.z, s * p.y + c * p.z); }
   vec3 rotX(vec3 p, float a) { float c = cos(a), s = sin(a); return vec3(p.x, p.y * c - p.z * s, p.y * s + p.z * c); }
 
   void main() {
@@ -94,7 +96,8 @@ const VERTEX_SHADER = /* glsl */ `
     vec3 o = position - uOrbCenter;
     // the globe turns; its orbit stays put, like saturn's rings
     float isOrbit = step(0.9, aGroup);
-    vec3 p0 = mix(rotY(o, t * 0.07) * (1.0 + sin(t * 0.8) * 0.012), o, isOrbit) + uOrbCenter;
+    // when the cursor rests, the whole orb slowly turns to face it
+    vec3 p0 = gaze(mix(rotY(o, t * 0.07) * (1.0 + sin(t * 0.8) * 0.012), o, isOrbit), uGaze) + uOrbCenter;
 
     // 1 brain: a slow sway
     vec3 brainLocal = mix(rotY(aBrain - uBrainCenter, sin(t * 0.18) * 0.2), aPortrait, uPortrait);
@@ -357,6 +360,7 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         uRippleAge: { value: 99 },
         uMusic: { value: 0 },
         uGravity: { value: 0 },
+        uGaze: { value: new THREE.Vector2(0, 0) },
         uBurstAge: { value: 99 },
         uRippleOrigin: { value: new THREE.Vector2(0, 0) },
         uHl3: { value: -1 },
@@ -465,10 +469,13 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
     // pointer
     const mouseTarget = new THREE.Vector2(9, 9);
     let pointerActive = 0;
+    let lastPointerMove = 0;
+    const gazeTarget = new THREE.Vector2();
     const onPointerMove = (e: PointerEvent) => {
       if (e.pointerType === 'touch') return;
       mouseTarget.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
       pointerActive = 1;
+      lastPointerMove = performance.now() * 0.001;
     };
     const onPointerLeave = () => {
       pointerActive = 0;
@@ -629,6 +636,11 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         // the well builds slowly while held and lets go fast
         u.uGravity.value += ((gravityOn ? 1 : 0) - u.uGravity.value) * Math.min(1, dt * (gravityOn ? 1.4 : 9));
         u.uBurstAge.value = Math.max(0, now - burstStart);
+        // the orb notices a resting cursor: it turns toward it slowly, and looks away quickly when you move
+        const resting = pointerActive && now - lastPointerMove > 1.4 && !gravityOn;
+        if (resting) gazeTarget.set(Math.max(-1, Math.min(1, mouseTarget.x - 0.35)) * 0.75, Math.max(-1, Math.min(1, mouseTarget.y)) * -0.45);
+        else gazeTarget.set(0, 0);
+        (u.uGaze.value as THREE.Vector2).lerp(gazeTarget, Math.min(1, dt * (resting ? 0.7 : 2.5)));
         u.uHl3.value = hl3Index;
         u.uHl3Amt.value = hl3Amt;
         u.uHl4.value = hl4Index;

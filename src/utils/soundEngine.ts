@@ -14,9 +14,29 @@ export const PIANO_KEY_MAP: Record<string, { freq: number; label: string; index:
   k: { freq: 440.0, label: 'A4', index: 7 },
 };
 
+/** each part of the site has its own chord and color: low and deep at the top, airy at the end */
+const MOODS: Record<string, { freqs: [number, number, number]; cutoff: number; level: number }> = {
+  hero: { freqs: [110.0, 164.81, 220.5], cutoff: 260, level: 0.022 },
+  about: { freqs: [130.81, 196.0, 261.9], cutoff: 380, level: 0.022 },
+  disciplines: { freqs: [116.54, 174.61, 233.4], cutoff: 520, level: 0.02 },
+  work: { freqs: [146.83, 220.0, 293.9], cutoff: 460, level: 0.02 },
+  journey: { freqs: [98.0, 146.83, 196.3], cutoff: 300, level: 0.024 },
+  recognition: { freqs: [130.81, 196.0, 329.9], cutoff: 600, level: 0.018 },
+  'field-notes': { freqs: [164.81, 246.94, 330.2], cutoff: 760, level: 0.016 },
+  'off-screen': { freqs: [146.83, 220.0, 370.2], cutoff: 820, level: 0.016 },
+  contact: { freqs: [196.0, 293.66, 392.4], cutoff: 1100, level: 0.014 },
+  calm: { freqs: [110.0, 164.81, 220.5], cutoff: 220, level: 0.016 },
+};
+const CHIMES = [1318.5, 1568.0, 1760.0, 2093.0, 2349.3, 2637.0];
+
 class SoundEngine {
   private ctx: AudioContext | null = null;
   private padGain: GainNode | null = null;
+  private padFilter: BiquadFilterNode | null = null;
+  private mood = 'hero';
+  private ducked = false;
+  private glitchTimer: number | null = null;
+  private lastChime = 0;
   private padOscs: OscillatorNode[] = [];
   private ambientTimer: number | null = null;
   private enabled = false;
@@ -80,17 +100,19 @@ class SoundEngine {
 
     const masterGain = ctx.createGain();
     masterGain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    masterGain.gain.exponentialRampToValueAtTime(0.022, ctx.currentTime + 1.8);
+    const start = MOODS[this.mood] ?? MOODS.hero;
+    masterGain.gain.exponentialRampToValueAtTime(this.ducked ? 0.0001 : start.level, ctx.currentTime + 1.8);
 
     const filter = ctx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(260, ctx.currentTime);
+    filter.frequency.setValueAtTime(start.cutoff, ctx.currentTime);
+    this.padFilter = filter;
 
     masterGain.connect(filter);
     filter.connect(ctx.destination);
 
     // Soft warm fifth drone (A2 + E3 + A3 slightly detuned)
-    const freqs = [110.0, 164.81, 220.5];
+    const freqs = start.freqs;
     this.padOscs = freqs.map((f, i) => {
       const osc = ctx.createOscillator();
       osc.type = i === 1 ? 'triangle' : 'sine';
@@ -104,14 +126,78 @@ class SoundEngine {
 
     // Occasional gentle ambient note every ~9 seconds while sound is on
     this.ambientTimer = window.setInterval(() => {
-      if (!this.enabled) return;
+      if (!this.enabled || this.ducked) return;
       const keys = Object.keys(PIANO_KEY_MAP);
       const randomKey = keys[Math.floor(Math.random() * keys.length)];
       this.playPianoNote(randomKey, 0.018);
     }, 9000);
+    if (this.mood === 'disciplines') this.glitchTimer = window.setInterval(() => this.tick(), 1700);
+  }
+
+  /** glide the drone to the chord of the section in view */
+  public setMood(name: string): void {
+    if (name === this.mood) return;
+    this.mood = name;
+    const mood = MOODS[name] ?? MOODS.calm;
+    if (this.glitchTimer !== null) { clearInterval(this.glitchTimer); this.glitchTimer = null; }
+    if (!this.enabled || !this.ctx || !this.padGain) return;
+    const now = this.ctx.currentTime;
+    this.padOscs.forEach((osc, i) => { osc.frequency.cancelScheduledValues(now); osc.frequency.setTargetAtTime(mood.freqs[i], now, 0.9); });
+    this.padFilter?.frequency.setTargetAtTime(mood.cutoff, now, 0.9);
+    if (!this.ducked) this.padGain.gain.setTargetAtTime(mood.level, now, 0.8);
+    // the security section gets quiet digital ticks under the drone
+    if (name === 'disciplines') this.glitchTimer = window.setInterval(() => this.tick(), 1700);
+  }
+
+  /** stay out of the way while Kal's real music is playing */
+  public setDucked(next: boolean): void {
+    if (next === this.ducked) return;
+    this.ducked = next;
+    if (!this.ctx || !this.padGain) return;
+    const level = next ? 0.0001 : (MOODS[this.mood] ?? MOODS.calm).level;
+    this.padGain.gain.setTargetAtTime(level, this.ctx.currentTime, 0.6);
+  }
+
+  private tick(): void {
+    if (!this.enabled || this.ducked || !this.ctx) return;
+    const ctx = this.ctx, now = ctx.currentTime;
+    for (let i = 0; i < 1 + Math.floor(Math.random() * 3); i++) {
+      const at = now + i * 0.06;
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(900 + Math.random() * 1400, at);
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.linearRampToValueAtTime(0.0035, at + 0.004);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.05);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(at); osc.stop(at + 0.06);
+    }
+  }
+
+  /** a tiny glassy chime as the cursor brushes through the particles */
+  public chime(x: number, strength: number): void {
+    if (!this.enabled || !this.ctx) return;
+    const ctx = this.ctx, now = ctx.currentTime;
+    if (now - this.lastChime < 0.07) return;
+    this.lastChime = now;
+    const freq = CHIMES[Math.floor(Math.random() * CHIMES.length)];
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.004 + 0.006 * Math.min(1, strength), now + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+    osc.connect(gain);
+    if (typeof ctx.createStereoPanner === 'function') {
+      const pan = ctx.createStereoPanner();
+      pan.pan.setValueAtTime(Math.max(-1, Math.min(1, x)) * 0.7, now);
+      gain.connect(pan); pan.connect(ctx.destination);
+    } else gain.connect(ctx.destination);
+    osc.start(now); osc.stop(now + 0.4);
   }
 
   private stopPad(): void {
+    if (this.glitchTimer !== null) { clearInterval(this.glitchTimer); this.glitchTimer = null; }
     if (this.ambientTimer !== null) {
       clearInterval(this.ambientTimer);
       this.ambientTimer = null;
