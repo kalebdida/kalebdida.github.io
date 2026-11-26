@@ -1,4 +1,5 @@
 import { SITE_DATA } from '../data/siteData';
+import { NowListening } from './NowListening';
 import { Arrow, RevealWords } from './Details';
 import { ResumeDownload } from './ResumeDownload';
 
@@ -10,6 +11,7 @@ export function NowView({ onNavigateHome }: ExtraPageProps) {
     <h1 data-reveal="words" className="t-title text-bone mt-4"><RevealWords text="Now" /></h1>
     <p data-reveal="words" className="t-lead text-ash mt-5"><RevealWords text={`What I’m doing this season: ${SITE_DATA.now.season.toLowerCase()}.`} /></p>
     <p data-reveal="up" className="t-meta text-ash mt-4"><span className="now-dot" aria-hidden="true" />Updated {SITE_DATA.now.updated}</p>
+    <dl className="mt-10"><NowListening relayUrl={SITE_DATA.contact.relayUrl} className="max-w-md" /></dl>
     <dl className="mt-14 space-y-4">
       {SITE_DATA.now.items.map(item => <div key={item.category} data-reveal="up" className="now-row grid grid-cols-1 sm:grid-cols-[9rem_1fr] gap-x-8 gap-y-3 items-baseline">
         <dt className="t-meta text-ash">{item.category}</dt><dd className="t-body text-bone">{item.detail}</dd>

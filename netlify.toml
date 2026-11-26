@@ -1,6 +1,6 @@
 [build]
 base = "netlify"
-command = "node --test relay.test.mjs"
+command = "node --test relay.test.mjs listening.test.mjs"
 publish = "public"
 
 [build.environment]

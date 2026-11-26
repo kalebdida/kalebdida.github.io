@@ -904,3 +904,12 @@ main h1.t-title { transform: skewY(var(--scroll-skew)); transition: transform 25
 .prerender li { margin: .35rem 0; }
 .prerender dt { font-family: var(--font-sans); font-size: .875rem; color: var(--color-ash); margin-top: .75rem; }
 .prerender dd { color: var(--color-bone); }
+
+/* now listening (Last.fm) */
+.listening-card dd a { display: block; }
+.listening-bars { display: inline-flex; align-items: flex-end; gap: 2px; width: 14px; height: 14px; }
+.listening-bars i { flex: 1; background: var(--color-signal, currentColor); border-radius: 1px; animation: listening-bar 900ms ease-in-out infinite alternate; }
+.listening-bars i:nth-child(2) { animation-delay: -300ms; }
+.listening-bars i:nth-child(3) { animation-delay: -600ms; }
+@keyframes listening-bar { from { height: 25%; } to { height: 100%; } }
+@media (prefers-reduced-motion: reduce) { .listening-bars i { animation: none; height: 60%; } }

@@ -18,6 +18,7 @@ import { useDialog } from './utils/useDialog';
 import { useReveals } from './utils/useReveals';
 import { ResumeDownload } from './components/ResumeDownload';
 import { AnonymousNote } from './components/AnonymousNote';
+import { NowListening } from './components/NowListening';
 import { VisitorCount } from './components/VisitorCount';
 import { Photo } from './components/Photo';
 import photoManifest from 'virtual:photos';
@@ -826,6 +827,7 @@ export default function App() {
                     </div>
                   ))}
                   <VisitorCount relayUrl={SITE_DATA.contact.relayUrl} siteUrl={SITE_DATA.identity.url} />
+                  <NowListening relayUrl={SITE_DATA.contact.relayUrl} />
                 </dl>
                 <AnonymousNote relayUrl={SITE_DATA.contact.relayUrl} />
               </div>
