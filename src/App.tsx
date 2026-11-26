@@ -148,6 +148,39 @@ export default function App() {
     media.addEventListener('change', change);
     return () => media.removeEventListener('change', change);
   }, []);
+
+  // dissolve mode: hold space and the page melts away, leaving only the 3D world
+  useEffect(() => {
+    if (reducedMotion) return;
+    const root = document.documentElement;
+    let holdTimer = 0, dissolved = false, down = false, cleanup = 0;
+    const typing = (el: EventTarget | null) => el instanceof HTMLElement && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(el.tagName));
+    const onDown = (event: KeyboardEvent) => {
+      if (event.code !== 'Space' || typing(event.target) || event.metaKey || event.ctrlKey || event.altKey) return;
+      event.preventDefault();
+      if (down) return;
+      down = true;
+      holdTimer = window.setTimeout(() => {
+        dissolved = true;
+        clearTimeout(cleanup);
+        root.classList.add('dissolve-ready', 'dissolving');
+      }, 260);
+    };
+    const onUp = (event: KeyboardEvent) => {
+      if (event.code !== 'Space' || !down) return;
+      down = false;
+      clearTimeout(holdTimer);
+      if (!dissolved) { window.scrollBy({ top: (event.shiftKey ? -1 : 1) * window.innerHeight * 0.85, behavior: 'smooth' }); return; }
+      dissolved = false;
+      root.classList.remove('dissolving');
+      cleanup = window.setTimeout(() => root.classList.remove('dissolve-ready'), 800);
+    };
+    const reset = () => { down = false; clearTimeout(holdTimer); if (dissolved) { dissolved = false; root.classList.remove('dissolving', 'dissolve-ready'); } };
+    window.addEventListener('keydown', onDown);
+    window.addEventListener('keyup', onUp);
+    window.addEventListener('blur', reset);
+    return () => { reset(); window.removeEventListener('keydown', onDown); window.removeEventListener('keyup', onUp); window.removeEventListener('blur', reset); };
+  }, [reducedMotion]);
   const { phase: routePhase, transition } = useRouteCurtain(reducedMotion);
   useCreativeMotion(reducedMotion);
   const [showLoader, setShowLoader] = useState<boolean>(() => {

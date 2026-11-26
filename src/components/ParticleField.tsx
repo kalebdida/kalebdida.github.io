@@ -167,7 +167,7 @@ const VERTEX_SHADER = /* glsl */ `
 
     // music: while Kal is listening, a slow heartbeat rolls outward through the field
     float beat = pow(max(0.0, sin(t * 4.2 - length(pos) * 0.9)), 6.0) * uMusic;
-    pos += normalize(pos + 0.0001) * beat * 0.06;
+    pos += normalize(pos + 0.0001) * beat * 0.12;
 
     pos.z -= uCalm * 3.0;
 
@@ -190,7 +190,7 @@ const VERTEX_SHADER = /* glsl */ `
 
     float base = mix(1.4, 2.6, fract(aSeed * 17.3)) * uSizeScale;
     float size = base * (1.0 + wConst * isCore * 0.8 + hl * 1.1 + wLight * (1.0 - isRing) * 1.4 + wSpread * 0.7 + wMind * 0.25)
-               + rippleBoost * 2.5 + push * 1.6 + firing * 2.0 + beat * 1.3;
+               + rippleBoost * 2.5 + push * 1.6 + firing * 2.0 + beat * 2.4;
     size *= 1.0 + uTransition * .25;
     gl_PointSize = size * uPixelRatio * min(8.0 / max(1.0, -mv.z), 1.7);
 
@@ -201,7 +201,7 @@ const VERTEX_SHADER = /* glsl */ `
     vAlpha = depthFade * mix(0.5, 0.15, uCalm) * lightDensity * twinkle * (1.0 + hl * 1.4 + firing * 2.0 + wSpread * 1.1 + wMind * 0.9);
     vAlpha *= mix(1.0, .2 + aPortraitBrightness * 1.8, wBrain * uPortrait);
     vAlpha *= 1.0 + uTransition * .25;
-    vAccent = clamp(wLight * (1.0 - isRing * 0.5) + rippleBoost * 0.85 + hl + firing + push * 0.6 + beat * 0.5, 0.0, 1.0);
+    vAccent = clamp(wLight * (1.0 - isRing * 0.5) + rippleBoost * 0.85 + hl + firing + push * 0.6 + beat * 0.9, 0.0, 1.0);
   }
 `;
 
