@@ -913,3 +913,5 @@ main h1.t-title { transform: skewY(var(--scroll-skew)); transition: transform 25
 .listening-bars i:nth-child(3) { animation-delay: -600ms; }
 @keyframes listening-bar { from { height: 25%; } to { height: 100%; } }
 @media (prefers-reduced-motion: reduce) { .listening-bars i { animation: none; height: 60%; } }
+.listening-pill { display: inline-flex; align-items: center; gap: .5rem; max-width: 100%; min-width: 0; padding: .35rem .75rem; border: 1px solid var(--color-hair); border-radius: 999px; background: rgb(var(--raised-rgb) / .6); transition: border-color 300ms; align-self: flex-start; }
+.listening-pill:hover { border-color: rgb(var(--signal-rgb) / .5); }

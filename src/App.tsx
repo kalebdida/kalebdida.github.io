@@ -612,6 +612,7 @@ export default function App() {
                   {clock.ethDate && <span className="block sm:inline"><span className="hidden sm:inline">, </span>{clock.ethDate}</span>}
                 </span>
               </div>
+              <NowListening relayUrl={SITE_DATA.contact.relayUrl} compact className="mt-4 intro-fade" />
 
               <div className="hero-copy mt-auto">
                 <h1 className="flex flex-wrap items-baseline gap-x-8 gap-y-3">

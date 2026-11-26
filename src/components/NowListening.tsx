@@ -12,7 +12,7 @@ function ago(at: number) {
 }
 
 /** Live from Last.fm through the relay. Renders nothing until it has a real track. */
-export function NowListening({ relayUrl, className = '' }: { relayUrl: string; className?: string }) {
+export function NowListening({ relayUrl, className = '', compact = false }: { relayUrl: string; className?: string; compact?: boolean }) {
   const [track, setTrack] = useState<Track | null>(null);
   useEffect(() => {
     if (!relayUrl || window.location.hostname !== 'kalebdida.github.io') return;
@@ -30,6 +30,11 @@ export function NowListening({ relayUrl, className = '' }: { relayUrl: string; c
     return () => { alive = false; clearInterval(timer); document.removeEventListener('visibilitychange', load); };
   }, [relayUrl]);
   if (!track) return null;
+  if (compact) return <a href={track.url} target="_blank" rel="noopener noreferrer" className={`listening-pill t-meta ${className}`} title={`${track.playing ? 'Listening now' : 'Last played'}: ${track.name} by ${track.artist}`}>
+    {track.playing ? <span className="listening-bars" aria-hidden="true"><i /><i /><i /></span> : <Music size={14} strokeWidth={1.5} aria-hidden="true" />}
+    <span className="text-ash">{track.playing ? 'Listening to' : 'Last played'}</span>
+    <span className="text-bone truncate">{track.name}</span><span className="text-ash truncate">· {track.artist}</span>
+  </a>;
   return <div className={`contact-card listening-card ${className}`}>
     <dt className="t-meta text-ash flex items-center gap-2">
       {track.playing ? <span className="listening-bars" aria-hidden="true"><i /><i /><i /></span> : <Music size={19} strokeWidth={1.5} aria-hidden="true" />}
