@@ -19,7 +19,7 @@ import { useReveals } from './utils/useReveals';
 import { ResumeDownload } from './components/ResumeDownload';
 import { AnonymousNote } from './components/AnonymousNote';
 import { NowListening } from './components/NowListening';
-import { Afterimage } from './components/Afterimage';
+import { PerceptionLab } from './components/PerceptionLab';
 import { VisitorCount } from './components/VisitorCount';
 import { Photo } from './components/Photo';
 import photoManifest from 'virtual:photos';
@@ -883,7 +883,7 @@ export default function App() {
                   <NowListening relayUrl={SITE_DATA.contact.relayUrl} />
                 </dl>
                 <AnonymousNote relayUrl={SITE_DATA.contact.relayUrl} />
-                <Afterimage src={(photoManifest[SITE_DATA.identity.portraitDark]?.srcSet.split(', ')[1]?.split(' ')[0]) || SITE_DATA.identity.portraitDark} />
+                <PerceptionLab src={(photoManifest[SITE_DATA.identity.portraitDark]?.srcSet.split(', ')[1]?.split(' ')[0]) || SITE_DATA.identity.portraitDark} />
               </div>
 
               <footer className="relative mt-24 pt-6 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 t-meta text-ash">
