@@ -67,6 +67,7 @@ const VERTEX_SHADER = /* glsl */ `
   uniform float uMouseStrength;
   uniform float uAspect;
   uniform float uRippleAge;
+  uniform float uMusic;
   uniform vec2 uRippleOrigin;
   uniform float uHl3;
   uniform float uHl3Amt;
@@ -164,6 +165,10 @@ const VERTEX_SHADER = /* glsl */ `
       rippleBoost = ring * fade;
     }
 
+    // music: while Kal is listening, a slow heartbeat rolls outward through the field
+    float beat = pow(max(0.0, sin(t * 4.2 - length(pos) * 0.9)), 6.0) * uMusic;
+    pos += normalize(pos + 0.0001) * beat * 0.06;
+
     pos.z -= uCalm * 3.0;
 
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
@@ -185,7 +190,7 @@ const VERTEX_SHADER = /* glsl */ `
 
     float base = mix(1.4, 2.6, fract(aSeed * 17.3)) * uSizeScale;
     float size = base * (1.0 + wConst * isCore * 0.8 + hl * 1.1 + wLight * (1.0 - isRing) * 1.4 + wSpread * 0.7 + wMind * 0.25)
-               + rippleBoost * 2.5 + push * 1.6 + firing * 2.0;
+               + rippleBoost * 2.5 + push * 1.6 + firing * 2.0 + beat * 1.3;
     size *= 1.0 + uTransition * .25;
     gl_PointSize = size * uPixelRatio * min(8.0 / max(1.0, -mv.z), 1.7);
 
@@ -196,7 +201,7 @@ const VERTEX_SHADER = /* glsl */ `
     vAlpha = depthFade * mix(0.5, 0.15, uCalm) * lightDensity * twinkle * (1.0 + hl * 1.4 + firing * 2.0 + wSpread * 1.1 + wMind * 0.9);
     vAlpha *= mix(1.0, .2 + aPortraitBrightness * 1.8, wBrain * uPortrait);
     vAlpha *= 1.0 + uTransition * .25;
-    vAccent = clamp(wLight * (1.0 - isRing * 0.5) + rippleBoost * 0.85 + hl + firing + push * 0.6, 0.0, 1.0);
+    vAccent = clamp(wLight * (1.0 - isRing * 0.5) + rippleBoost * 0.85 + hl + firing + push * 0.6 + beat * 0.5, 0.0, 1.0);
   }
 `;
 
@@ -334,6 +339,7 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         uMouseStrength: { value: 0 },
         uAspect: { value: window.innerWidth / Math.max(1, window.innerHeight) },
         uRippleAge: { value: 99 },
+        uMusic: { value: 0 },
         uRippleOrigin: { value: new THREE.Vector2(0, 0) },
         uHl3: { value: -1 },
         uHl3Amt: { value: 0 },
@@ -479,6 +485,9 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
     let lastTime = performance.now() * 0.001;
     const startTime = lastTime;
     let slowFrames = 0;
+    let musicOn = Boolean((window as unknown as { __kalListening?: boolean }).__kalListening);
+    const onMusic = (event: Event) => { musicOn = Boolean((event as CustomEvent<boolean>).detail); };
+    window.addEventListener('kal:listening', onMusic);
     let curStage = sceneRef.current.stage;
     let curCalm = modeRef.current === 'calm' ? 1 : 0;
     let curDrift = 0;
@@ -573,6 +582,8 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         u.uIntro.value = Math.min(1, (now - startTime) / 2.6);
         u.uCalm.value = curCalm;
         u.uRippleAge.value = Math.max(0, now - rippleStart);
+        // ease in and out of the music pulse over about two seconds
+        u.uMusic.value += ((musicOn ? 1 : 0) - u.uMusic.value) * Math.min(1, dt * 0.8);
         u.uHl3.value = hl3Index;
         u.uHl3Amt.value = hl3Amt;
         u.uHl4.value = hl4Index;
@@ -603,6 +614,7 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
     frame();
 
     return () => {
+      window.removeEventListener('kal:listening', onMusic);
       cancelAnimationFrame(frameId);
       clearTimeout(frameId);
       window.removeEventListener('kal:piano-ripple', onPianoRipple);

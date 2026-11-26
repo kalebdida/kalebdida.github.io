@@ -21,7 +21,14 @@ export function NowListening({ relayUrl, className = '', compact = false }: { re
       if (document.hidden) return;
       fetch(`${relayUrl.replace(/\/$/, '')}/listening`, { credentials: 'omit' })
         .then(r => r.ok ? r.json() : null)
-        .then(data => { if (alive && data?.ok && data.track?.name) setTrack(data.track); })
+                .then(data => {
+          if (!alive || !data?.ok) return;
+          const playing = Boolean(data.track?.playing);
+          // tell the 3D scene, so the particles can pulse while music plays
+          (window as unknown as { __kalListening?: boolean }).__kalListening = playing;
+          window.dispatchEvent(new CustomEvent('kal:listening', { detail: playing }));
+          if (data.track?.name) setTrack(data.track);
+        })
         .catch(() => {});
     };
     load();
