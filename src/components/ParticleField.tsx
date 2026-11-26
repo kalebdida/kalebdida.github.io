@@ -68,6 +68,8 @@ const VERTEX_SHADER = /* glsl */ `
   uniform float uAspect;
   uniform float uRippleAge;
   uniform float uMusic;
+  uniform float uGravity;
+  uniform float uBurstAge;
   uniform vec2 uRippleOrigin;
   uniform float uHl3;
   uniform float uHl3Amt;
@@ -182,6 +184,20 @@ const VERTEX_SHADER = /* glsl */ `
     float push = (1.0 - smoothstep(0.0, 0.32, dist)) * uMouseStrength * (1.0 - uCalm);
     push *= 1.0 - .96 * clamp(wBrain + wTriad + wConst + wLight, 0.0, 1.0);
     mv.xy += (d / max(dist, 0.0001)) * push * 0.45 * (-mv.z / 7.0);
+
+    // gravity well: hold the mouse down and the field falls toward it, with a slight swirl
+    vec2 toMouse = uMouse - ndc;
+    float well = uGravity * exp(-dist * 1.1);
+    vec2 swirl = vec2(-toMouse.y, toMouse.x) * 0.35;
+    vec2 fall = (toMouse * 0.82 + swirl) * well;
+    // let go: everything near the well is flung back out in a ring
+    float burst = 0.0;
+    if (uBurstAge < 1.6) {
+      burst = exp(-pow(dist - uBurstAge * 2.2, 2.0) * 5.0) * (1.0 - uBurstAge / 1.6);
+      fall -= (toMouse / max(dist, 0.0001)) * burst * 0.22;
+    }
+    // ndc offset to view space (fov about 50 degrees)
+    mv.xy += vec2(fall.x * uAspect, fall.y) * (-mv.z) * 0.47;
     gl_Position = projectionMatrix * mv;
 
     float hl = max(sel(g3, uHl3) * wTriad * uHl3Amt, sel(g4, uHl4) * wConst * uHl4Amt);
@@ -190,7 +206,7 @@ const VERTEX_SHADER = /* glsl */ `
 
     float base = mix(1.4, 2.6, fract(aSeed * 17.3)) * uSizeScale;
     float size = base * (1.0 + wConst * isCore * 0.8 + hl * 1.1 + wLight * (1.0 - isRing) * 1.4 + wSpread * 0.7 + wMind * 0.25)
-               + rippleBoost * 2.5 + push * 1.6 + firing * 2.0 + beat * 2.4;
+               + rippleBoost * 2.5 + push * 1.6 + firing * 2.0 + beat * 2.4 + well * 1.6 + burst * 3.0;
     size *= 1.0 + uTransition * .25;
     gl_PointSize = size * uPixelRatio * min(8.0 / max(1.0, -mv.z), 1.7);
 
@@ -201,7 +217,7 @@ const VERTEX_SHADER = /* glsl */ `
     vAlpha = depthFade * mix(0.5, 0.15, uCalm) * lightDensity * twinkle * (1.0 + hl * 1.4 + firing * 2.0 + wSpread * 1.1 + wMind * 0.9);
     vAlpha *= mix(1.0, .2 + aPortraitBrightness * 1.8, wBrain * uPortrait);
     vAlpha *= 1.0 + uTransition * .25;
-    vAccent = clamp(wLight * (1.0 - isRing * 0.5) + rippleBoost * 0.85 + hl + firing + push * 0.6 + beat * 0.9, 0.0, 1.0);
+    vAccent = clamp(wLight * (1.0 - isRing * 0.5) + rippleBoost * 0.85 + hl + firing + push * 0.6 + beat * 0.9 + well * 0.7 + burst, 0.0, 1.0);
   }
 `;
 
@@ -340,6 +356,8 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         uAspect: { value: window.innerWidth / Math.max(1, window.innerHeight) },
         uRippleAge: { value: 99 },
         uMusic: { value: 0 },
+        uGravity: { value: 0 },
+        uBurstAge: { value: 99 },
         uRippleOrigin: { value: new THREE.Vector2(0, 0) },
         uHl3: { value: -1 },
         uHl3Amt: { value: 0 },
@@ -456,6 +474,30 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
       pointerActive = 0;
     };
     window.addEventListener('pointermove', onPointerMove, { passive: true });
+
+    // gravity well: press and hold on empty space (not links, buttons or fields)
+    let gravityOn = false, gravityTimer = 0, burstStart = -99;
+    const interactive = (el: EventTarget | null) => el instanceof Element && Boolean(el.closest('a, button, input, textarea, select, label, summary, [role="button"], [contenteditable="true"], .note-card'));
+    const onGravityDown = (e: PointerEvent) => {
+      if (e.button !== 0 || e.pointerType === 'touch' || interactive(e.target)) return;
+      mouseTarget.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+      gravityTimer = window.setTimeout(() => {
+        gravityOn = true;
+        document.documentElement.classList.add('gravity-well');
+        window.getSelection()?.removeAllRanges();
+      }, 220);
+    };
+    const onGravityUp = () => {
+      clearTimeout(gravityTimer);
+      if (!gravityOn) return;
+      gravityOn = false;
+      burstStart = performance.now() * 0.001;
+      document.documentElement.classList.remove('gravity-well');
+    };
+    window.addEventListener('pointerdown', onGravityDown);
+    window.addEventListener('pointerup', onGravityUp);
+    window.addEventListener('pointercancel', onGravityUp);
+    window.addEventListener('blur', onGravityUp);
     document.addEventListener('pointerleave', onPointerLeave);
 
     const onResize = () => {
@@ -584,6 +626,9 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
         u.uRippleAge.value = Math.max(0, now - rippleStart);
         // ease in and out of the music pulse over about two seconds
         u.uMusic.value += ((musicOn ? 1 : 0) - u.uMusic.value) * Math.min(1, dt * 0.8);
+        // the well builds slowly while held and lets go fast
+        u.uGravity.value += ((gravityOn ? 1 : 0) - u.uGravity.value) * Math.min(1, dt * (gravityOn ? 1.4 : 9));
+        u.uBurstAge.value = Math.max(0, now - burstStart);
         u.uHl3.value = hl3Index;
         u.uHl3Amt.value = hl3Amt;
         u.uHl4.value = hl4Index;
@@ -620,6 +665,12 @@ export function ParticleField({ mode, sceneRef }: ParticleFieldProps) {
       window.removeEventListener('kal:piano-ripple', onPianoRipple);
       window.removeEventListener('kal:theme', onTheme);
       window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerdown', onGravityDown);
+      window.removeEventListener('pointerup', onGravityUp);
+      window.removeEventListener('pointercancel', onGravityUp);
+      window.removeEventListener('blur', onGravityUp);
+      clearTimeout(gravityTimer);
+      document.documentElement.classList.remove('gravity-well');
       document.removeEventListener('pointerleave', onPointerLeave);
       window.removeEventListener('resize', onResize);
       document.removeEventListener('visibilitychange', onVisibility);
