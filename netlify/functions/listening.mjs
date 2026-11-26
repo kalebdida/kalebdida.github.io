@@ -23,7 +23,11 @@ export async function listening(request, env = process.env, requestUpstream = fe
   url.search = new URLSearchParams({ method: 'user.getrecenttracks', user, api_key: key, format: 'json', limit: '1' });
   try {
     const response = await requestUpstream(url, { signal: AbortSignal.timeout(8000) });
-    if (!response.ok) return reply({ ok: false, error: 'Last.fm unavailable' }, 502, 'no-store');
+    if (!response.ok) {
+      // Last.fm explains failures with a code (6 = user not found, 10 = invalid key); safe to show, never contains the key
+      const problem = await response.json().catch(() => ({}));
+      return reply({ ok: false, error: 'Last.fm unavailable', status: response.status, lastfmCode: problem.error ?? null, lastfmMessage: typeof problem.message === 'string' ? problem.message.slice(0, 200) : null }, 502, 'no-store');
+    }
     const data = await response.json();
     const track = [].concat(data?.recenttracks?.track ?? [])[0];
     if (!track) return reply({ ok: true, track: null });
