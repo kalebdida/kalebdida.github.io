@@ -1,0 +1,63 @@
+# Kaleb Dida Abera (Kal)
+
+> Aspiring cognitive scientist. Human-centered AI and software. Based in Addis Ababa, Ethiopia. Minds, machines, and the locks between them.
+
+I'm Kal, an aspiring cognitive scientist currently based in Addis Ababa. I build human-centered software, play CTFs, and want to become an AI engineer.
+
+How minds work, how machines think, and how to keep those machines safe.
+
+I graduated from Adama Science and Technology University Special School (ASTU SPS) in July 2026, first in my section every year. This is my gap year before studying cognitive science: I’m building Logbook, competing in CTFs, and teaching weekly Bible lessons to kids in my neighborhood.
+
+Logbook is what I’m building right now. It’s a private, offline-first journal with an AI companion that asks me a question every day and remembers past entries and photos. It’s how I’ve been exploring whether software can support memory and self-reflection.
+
+Before that came a summer of neuroscience research with ThinkNeuro, the INSA cyber talent program, a four-person robotics team I led, and a Peace Club I founded that grew to 63 members.
+
+## Projects
+- [Logbook](https://kalebdida.github.io/projects): A private, offline-first journal with an AI companion that asks a daily question and remembers past entries and photos.
+- [ThinkNeuro research](https://kalebdida.github.io/projects): A bibliometric review of the 100 most-cited papers on detecting adolescent depression and anxiety with wearable nanotechnology and biofeedback.
+- [Obstacle-avoidance robot](https://kalebdida.github.io/projects): A sensor-based robot that detects and steers around obstacles, built by a team of four that I led.
+- [Church Finder](https://kalebdida.github.io/projects): Find the churches near you, starting with every church in Addis Ababa.
+
+## Journey
+- Before 2022: Saint Joseph Catholic School
+- 2020 to 2024: Part-time at PJ Masks Playground. Waiter, cashier and children’s play attendant, mostly on Saturdays, for four years.
+- 2022 to 2026: Debate club. Researched and argued three team rounds on school systems. We won.
+- 2023: Led a robotics team. Four of us built a robot that detects and steers around obstacles.
+- 2023 to 2024: INSA cyber talent program. Selected trainee in the national program for young technical talent. Studied how systems fail, how attackers think, and how to defend.
+- 2023 to present: Capture the flag. Three contests so far, solo and on teams. Best finish: 9th of 53 teams.
+- 2023 to present: Volunteer Bible teacher. Weekly Sunday lessons for 12 neighborhood children.
+- 2024 to 2025: Research intern at ThinkNeuro. A bibliometric review on adolescent depression and anxiety, presented at the ThinkNeuro research symposium.
+- 2025 to 2026: Founded the Peace Club. YMCA-affiliated, at my school. Grew it to 63 members and led two sessions a week on gender-based violence and peacekeeping.
+- 2025 to 2026: Organized a summer school. A two-month program for 36 students, over 90% of them girls, most from families who couldn’t afford tutoring. Prepared grade 6 and 8 students for national exams.
+- July 2026: Graduated from ASTU SPS. First in my section every year.
+- 2026 to 2027: Gap year. Building Logbook, competing in CTFs, teaching Bible lessons.
+
+## Recognition
+- 1st place, The World in Us writing competition, for a piece on teaching discipline in the digital age (International)
+- 1590 SAT, November 2026, with 800 in Math
+- 2nd place, STEMpower program (Citywide)
+- 4th place, National online English competition (National)
+- Stage 4 of 6, National mathematics olympiad (National)
+- 9th of 53, Best team finish in a capture the flag contest
+
+## Field notes
+- [The thing I wrote about most was the thing I forgot](https://medium.com/@kalebdida/the-thing-i-wrote-about-most-was-the-thing-i-forgot-dce282809fd3): A one-week experiment on what rereading our own writing reveals: nine patterns in seven journal entries, and the one I wrote about most but forgot.
+- [Building Logbook: a personal OS in vanilla JS](https://kalebdida.github.io/blog/building-logbook): How a journaling app turned into the place my whole day lives.
+- [What an obstacle-avoiding robot taught me in 2023](https://kalebdida.github.io/blog/obstacle-avoiding-robot-2023): Notes from leading a team of four building an obstacle-avoiding robot.
+- [Why cognitive science](https://kalebdida.github.io/blog/why-cognitive-science): Why I chose cognitive science, and where I want it to take me.
+- [Command injection: RCE on DVWA](https://medium.com/@kalebdida/command-injection-rce-on-dvwa-63b30fd424c2): A command-injection and remote-code-execution walkthrough in the DVWA practice lab.
+- [How I built my first robot and found my passion for tech](https://medium.com/@kalebdida/how-i-built-my-first-robot-and-found-my-passion-for-tech-4e58d224d040): Building my first robot and finding my passion for technology.
+- [OhSINT: TryHackMe](https://medium.com/@kalebdida/ohsint-tryhackme-84379354e692): A walkthrough of the OhSINT open-source intelligence room on TryHackMe.
+
+## Pages
+- [Home](https://kalebdida.github.io/)
+- [Projects](https://kalebdida.github.io/projects)
+- [Field notes](https://kalebdida.github.io/blog)
+- [Now](https://kalebdida.github.io/now)
+- [Resume](https://kalebdida.github.io/resume)
+
+## Contact
+- GitHub: https://github.com/kalebdida
+- Telegram: https://t.me/CalebDida
+- LinkedIn: https://www.linkedin.com/in/kaleb-d-abera-565243324/
+- Instagram: https://www.instagram.com/kalebdida/
