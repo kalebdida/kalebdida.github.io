@@ -35,3 +35,11 @@ jobs:
           git add -A
           git commit -q -m "deploy ${GITHUB_SHA::7}"
           git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" main
+      - name: tell Bing and other IndexNow engines what changed
+        continue-on-error: true
+        run: |
+          sleep 90
+          urls=$(grep -o '<loc>[^<]*' dist/sitemap.xml | sed 's/<loc>//' | jq -R . | jq -s -c .)
+          curl -sS -o /dev/null -w "IndexNow %{http_code}\n" -X POST https://api.indexnow.org/indexnow \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            -d "{\"host\":\"kalebdida.github.io\",\"key\":\"21b8f0656a6c5f55b372bc34cd8e3cbc\",\"keyLocation\":\"https://kalebdida.github.io/21b8f0656a6c5f55b372bc34cd8e3cbc.txt\",\"urlList\":$urls}"

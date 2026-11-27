@@ -33,9 +33,14 @@ export function siteArtifacts(root) {
     homeLocation: { '@type': 'Place', name: identity.city }, jobTitle: identity.title,
     alumniOf: resume.education.filter(edu => edu.school !== 'Gap year').map(edu => ({ '@type': 'EducationalOrganization', name: edu.school })),
     knowsLanguage: resume.skills.find(s => s.group === 'Languages')?.items.map(lang => lang.split(' (')[0]),
-    sameAs: socials.filter(s => s.href.startsWith('https://')).map(s => s.href),
+    sameAs: [...socials.filter(s => s.href.startsWith('https://')).map(s => s.href),
+      ...(posts.some(p => p.external?.platform === 'medium') ? ['https://medium.com/@kalebdida'] : [])],
   };
   const content = loadContent(root);
+  // facts search engines and AI overviews can quote directly
+  person.description = identity.intro;
+  person.knowsAbout = ['Cognitive science', 'Human-centered AI', 'Cybersecurity', 'Capture the flag (CTF)', 'Robotics', 'Web development', 'Three.js'];
+  person.award = content.recognition.map(r => `${r.title}, ${r.detail}${r.scope ? ` (${r.scope})` : ''}`);
   return { identity, posts, routes, rss, sitemap, person, content };
 }
 
